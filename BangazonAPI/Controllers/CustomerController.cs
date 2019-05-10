@@ -33,17 +33,32 @@ namespace BangazonAPI.Controllers
         [HttpGet]
         //this function gets a List of all Customers in the database
         // TODO: add 'include' queries
-        public async Task<IActionResult> Get(string include)
+        public async Task<IActionResult> Get(string _include)
         {
             //create the SQL as a string, in order to be able to add to it with the 'include' queries
-            string sql = @"SELECT c.Id, c.FirstName, c.LastName 
-                                FROM Customer c";
+            string sql_head = @"SELECT c.Id, c.FirstName, c.LastName";
+            string sql_end = @"FROM Customer c";
+
+            string sql_product_middle = @", p.Id AS ProductId, p.Price, p.Title, p.[Description], p.Quantity, p.ProductTypeId AS TypeId, pt.Name AS ProductType";
+            string sql_product_end = @"JOIN Product p ON c.Id = p.CustomerId
+                    JOIN ProductType pt ON p.ProductTypeId = pt.Id";
+            
+
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = sql;
+                    if (_include == "product")
+                    {
+                        cmd.CommandText = sql_head + sql_product_middle + sql_end + sql_product_end;
+                    } else if (_include == "payments")
+                    {
+
+                    } else
+                    {
+                        cmd.CommandText = sql_head + sql_end;
+                    }
 
                     SqlDataReader reader = await cmd.ExecuteReaderAsync();
                     List<Customer> customers = new List<Customer>();
@@ -56,6 +71,19 @@ namespace BangazonAPI.Controllers
                             FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
                             LastName = reader.GetString(reader.GetOrdinal("LastName"))
                         };
+                        if (_include == "product")
+                        {
+                            customer.ProductsSelling.Add(new Product
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("ProductId")),
+                                Title = reader.GetString(reader.GetOrdinal("Title")),
+                                Description = reader.GetString(reader.GetOrdinal("Description")),
+                                ProductTypeId = reader.GetInt32(reader.GetOrdinal("TypeId")),
+                                ProductType = reader.GetString(reader.GetOrdinal("ProductType")),
+                                Price = reader.GetDouble(reader.GetOrdinal("Price")),
+                                Quantity = reader.GetInt32(reader.GetOrdinal("Quantity"))
+                            });
+                        }
 
                         customers.Add(customer);
                     }
