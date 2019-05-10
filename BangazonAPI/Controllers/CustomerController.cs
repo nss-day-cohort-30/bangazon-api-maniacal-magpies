@@ -42,15 +42,15 @@ namespace BangazonAPI.Controllers
             if (_include == "products") //?_include=product
             {
                 string sql_product_middle = @", p.Id AS ProductId, p.Price, p.Title, p.[Description], p.Quantity, p.ProductTypeId AS TypeId, pt.Name AS ProductType";
-                string sql_product_end = @"JOIN Product p ON c.Id = p.CustomerId
-                    JOIN ProductType pt ON p.ProductTypeId = pt.Id";
+                string sql_product_end = @"LEFT JOIN Product p ON c.Id = p.CustomerId
+                                                LEFT JOIN ProductType pt ON p.ProductTypeId = pt.Id";
                 sql = $"{sql_head} {sql_product_middle} {sql_end} {sql_product_end}";
             }
             else if (_include == "payments") //?_include=payments
             {
                 string sql_payments_middle = ", pt.Id AS PaymentId, pt.Name, pt.AcctNumber";
-                string sql_payments_end = @"JOIN PaymentType pt ON c.Id = pt.CustomerId
-                    JOIN [Order] o ON pt.Id = o.PaymentTypeId";
+                string sql_payments_end = @"LEFT JOIN [Order] o ON c.Id = o.CustomerId
+                                                LEFT JOIN PaymentType pt ON o.PaymentTypeId = pt.Id";
                 sql = $"{sql_head} {sql_payments_middle} {sql_end} {sql_payments_end}";
             }
 
@@ -96,26 +96,32 @@ namespace BangazonAPI.Controllers
 
                         if (_include == "products")
                         {
-                            customerHash[customerId].ProductsSelling.Add(new Product
+                            if (!reader.IsDBNull(reader.GetOrdinal("Title")))
                             {
-                                Id = reader.GetInt32(reader.GetOrdinal("ProductId")),
-                                Title = reader.GetString(reader.GetOrdinal("Title")),
-                                Description = reader.GetString(reader.GetOrdinal("Description")),
-                                ProductTypeId = reader.GetInt32(reader.GetOrdinal("TypeId")),
-                                ProductType = reader.GetString(reader.GetOrdinal("ProductType")),
-                                Price = reader.GetDecimal(reader.GetOrdinal("Price")),
-                                Quantity = reader.GetInt32(reader.GetOrdinal("Quantity"))
-                            });
+                                customerHash[customerId].ProductsSelling.Add(new Product
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("ProductId")),
+                                    Title = reader.GetString(reader.GetOrdinal("Title")),
+                                    Description = reader.GetString(reader.GetOrdinal("Description")),
+                                    ProductTypeId = reader.GetInt32(reader.GetOrdinal("TypeId")),
+                                    ProductType = reader.GetString(reader.GetOrdinal("ProductType")),
+                                    Price = reader.GetDecimal(reader.GetOrdinal("Price")),
+                                    Quantity = reader.GetInt32(reader.GetOrdinal("Quantity"))
+                                });
+                            }
                         };
 
                         if (_include == "payments")
                         {
-                            customerHash[customerId].PaymentTypesUsed.Add(new PaymentType
+                            if (!reader.IsDBNull(reader.GetOrdinal("Name")))
                             {
-                                Id = reader.GetInt32(reader.GetOrdinal("PaymentId")),
-                                Name = reader.GetString(reader.GetOrdinal("Name")),
-                                AcctNumber = reader.GetInt32(reader.GetOrdinal("AcctNumber"))
-                            });
+                                customerHash[customerId].PaymentTypesUsed.Add(new PaymentType
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("PaymentId")),
+                                    Name = reader.GetString(reader.GetOrdinal("Name")),
+                                    AcctNumber = reader.GetInt32(reader.GetOrdinal("AcctNumber"))
+                                });
+                            }
                         };
 
                         customers = customerHash.Values.ToList();
@@ -129,29 +135,29 @@ namespace BangazonAPI.Controllers
 
         [HttpGet("{id}", Name = "GetCustomer")]
         //this function gets a single Customer from the database, by id
-        // TODO: add 'include' queries
         public async Task<IActionResult> Get([FromRoute] int id, string _include)
         {
             try
             {
                 //create the SQL as a string, in order to be able to add to it with the 'include' queries
                 string sql_head = "SELECT c.Id, c.FirstName, c.LastName";
-                string sql_end = "FROM Customer c WHERE c.Id = @id";
-                string sql = $"{sql_head} {sql_end}";
+                string sql_from = "FROM Customer c";
+                string sql_where = "WHERE c.Id = @id";
+                string sql = $"{sql_head} {sql_from} {sql_where}";
 
                 if (_include == "products") //?_include=product
                 {
                     string sql_product_middle = @", p.Id AS ProductId, p.Price, p.Title, p.[Description], p.Quantity, p.ProductTypeId AS TypeId, pt.Name AS ProductType";
-                    string sql_product_end = @"JOIN Product p ON c.Id = p.CustomerId
-                    JOIN ProductType pt ON p.ProductTypeId = pt.Id";
-                    sql = $"{sql_head} {sql_product_middle} {sql_end} {sql_product_end}";
+                    string sql_product_end = @"LEFT JOIN Product p ON c.Id = p.CustomerId
+                                                    LEFT JOIN ProductType pt ON p.ProductTypeId = pt.Id";
+                    sql = $"{sql_head} {sql_product_middle} {sql_from} {sql_product_end} {sql_where}";
                 }
                 else if (_include == "payments") //?_include=payments
                 {
                     string sql_payments_middle = ", pt.Id AS PaymentId, pt.Name, pt.AcctNumber";
-                    string sql_payments_end = @" JOIN PaymentType pt ON c.Id = pt.CustomerId
-                    JOIN [Order] o ON pt.Id = o.PaymentTypeId";
-                    sql = $"{sql_head} {sql_payments_middle} {sql_end} {sql_payments_end}";
+                    string sql_payments_end = @"LEFT JOIN [Order] o ON c.Id = o.CustomerId
+                                                    LEFT JOIN PaymentType pt ON o.PaymentTypeId = pt.Id";
+                    sql = $"{sql_head} {sql_payments_middle} {sql_from} {sql_payments_end} {sql_where}";
                 }
                 using (SqlConnection conn = Connection)
                 {
@@ -180,26 +186,32 @@ namespace BangazonAPI.Controllers
                             }
                             if (_include == "products")
                             {
-                                customer.ProductsSelling.Add(new Product
+                                if (!reader.IsDBNull(reader.GetOrdinal("Title")))
                                 {
-                                    Id = reader.GetInt32(reader.GetOrdinal("ProductId")),
-                                    Title = reader.GetString(reader.GetOrdinal("Title")),
-                                    Description = reader.GetString(reader.GetOrdinal("Description")),
-                                    ProductTypeId = reader.GetInt32(reader.GetOrdinal("TypeId")),
-                                    ProductType = reader.GetString(reader.GetOrdinal("ProductType")),
-                                    Price = reader.GetDecimal(reader.GetOrdinal("Price")),
-                                    Quantity = reader.GetInt32(reader.GetOrdinal("Quantity"))
-                                });
+                                    customer.ProductsSelling.Add(new Product
+                                    {
+                                        Id = reader.GetInt32(reader.GetOrdinal("ProductId")),
+                                        Title = reader.GetString(reader.GetOrdinal("Title")),
+                                        Description = reader.GetString(reader.GetOrdinal("Description")),
+                                        ProductTypeId = reader.GetInt32(reader.GetOrdinal("TypeId")),
+                                        ProductType = reader.GetString(reader.GetOrdinal("ProductType")),
+                                        Price = reader.GetDecimal(reader.GetOrdinal("Price")),
+                                        Quantity = reader.GetInt32(reader.GetOrdinal("Quantity"))
+                                    });
+                                }
                             }
 
                             if (_include == "payments")
                             {
-                                customer.PaymentTypesUsed.Add(new PaymentType
+                                if (!reader.IsDBNull(reader.GetOrdinal("PaymentId")))
                                 {
-                                    Id = reader.GetInt32(reader.GetOrdinal("PaymentId")),
-                                    Name = reader.GetString(reader.GetOrdinal("Name")),
-                                    AcctNumber = reader.GetInt32(reader.GetOrdinal("AcctNumber"))
-                                });
+                                    customer.PaymentTypesUsed.Add(new PaymentType
+                                    {
+                                        Id = reader.GetInt32(reader.GetOrdinal("PaymentId")),
+                                        Name = reader.GetString(reader.GetOrdinal("Name")),
+                                        AcctNumber = reader.GetInt32(reader.GetOrdinal("AcctNumber"))
+                                    });
+                                }
                             }
                         }
                         reader.Close();
