@@ -11,7 +11,7 @@
 
 //namespace BangazonAPI.Controllers
 //{
-//    [Route("api/[controller]")]
+//    [Route("[controller]")]
 //    [ApiController]
 //    public class CustomersController : ControllerBase
 //    {
