@@ -106,6 +106,7 @@ namespace BangazonAPI.Controllers
         }
 
         [HttpPost]
+        //this function adds a single Customer to the database
         public async Task<IActionResult> Post([FromBody] Customer customer)
         {
             using (SqlConnection conn = Connection)
@@ -113,15 +114,13 @@ namespace BangazonAPI.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"INSERT INTO Customer (FirstName, LastName, SlackName, CohortId)
+                    cmd.CommandText = @"INSERT INTO Customer (FirstName, LastName)
                                         OUTPUT INSERTED.Id
-                                        VALUES (@FirstName, @LastName, @SlackName, @CohortId)";
-                    cmd.Parameters.Add(new SqlParameter("@FirstName", customer._firstname));
-                    cmd.Parameters.Add(new SqlParameter("@LastName", customer._lastname));
-                    cmd.Parameters.Add(new SqlParameter("@SlackName", customer._handle));
-                    cmd.Parameters.Add(new SqlParameter("@CohortId", customer._cohort.Id));
+                                        VALUES (@FirstName, @LastName)";
+                    cmd.Parameters.Add(new SqlParameter("@FirstName", customer.FirstName));
+                    cmd.Parameters.Add(new SqlParameter("@LastName", customer.LastName));
 
-                    int newId = (int)cmd.ExecuteScalar();
+                    int newId = (int)await cmd.ExecuteScalarAsync();
                     customer.Id = newId;
                     return CreatedAtRoute("GetCustomer", new { id = newId }, customer);
                 }
@@ -129,6 +128,7 @@ namespace BangazonAPI.Controllers
         }
 
         [HttpPut("{id}")]
+        //this function updates a single Customer in the database
         public async Task<IActionResult> Put([FromRoute] int id, [FromBody] Customer customer)
         {
             try
@@ -139,14 +139,11 @@ namespace BangazonAPI.Controllers
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
                         cmd.CommandText = @"UPDATE Customer SET FirstName = @FirstName,
-                                            LastName = @LastName, SlackName = @SlackName,
-                                            CohortId = @CohortId WHERE Id = @id";
-                        cmd.Parameters.Add(new SqlParameter("@FirstName", customer._firstname));
-                        cmd.Parameters.Add(new SqlParameter("@LastName", customer._lastname));
-                        cmd.Parameters.Add(new SqlParameter("@SlackName", customer._handle));
-                        cmd.Parameters.Add(new SqlParameter("@CohortId", customer._cohort.Id));
+                                            LastName = @LastName WHERE Id = @id";
+                        cmd.Parameters.Add(new SqlParameter("@FirstName", customer.FirstName));
+                        cmd.Parameters.Add(new SqlParameter("@LastName", customer.LastName));
 
-                        int rowsAffected = cmd.ExecuteNonQuery();
+                        int rowsAffected = await cmd.ExecuteNonQueryAsync();
                         if (rowsAffected > 0)
                         {
                             return new StatusCodeResult(StatusCodes.Status204NoContent);
@@ -168,40 +165,7 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete([FromRoute] int id)
-        {
-            try
-            {
-                using (SqlConnection conn = Connection)
-                {
-                    conn.Open();
-                    using (SqlCommand cmd = conn.CreateCommand())
-                    {
-                        cmd.CommandText = @"DELETE FROM Customer WHERE Id = @id";
-                        cmd.Parameters.Add(new SqlParameter("@id", id));
-
-                        int rowsAffected = cmd.ExecuteNonQuery();
-                        if (rowsAffected > 0)
-                        {
-                            return new StatusCodeResult(StatusCodes.Status204NoContent);
-                        }
-                        throw new Exception("No rows affected");
-                    }
-                }
-            }
-            catch (Exception)
-            {
-                if (!CustomerExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-        }
+        //Customer does NOT have a Delete function
 
         private bool CustomerExists(int id)
         {
@@ -210,7 +174,7 @@ namespace BangazonAPI.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"SELECT Id, FirstName, LastName, SlackName, CohortId
+                    cmd.CommandText = @"SELECT Id, FirstName, LastName
                                         FROM Customer WHERE Id = @id";
                     cmd.Parameters.Add(new SqlParameter("@id", id));
 
