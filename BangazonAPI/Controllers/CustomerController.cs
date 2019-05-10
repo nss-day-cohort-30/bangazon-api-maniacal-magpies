@@ -33,32 +33,46 @@ namespace BangazonAPI.Controllers
         [HttpGet]
         //this function gets a List of all Customers in the database
         // TODO: add 'include' queries
-        public async Task<IActionResult> Get(string _include)
+        public async Task<IActionResult> Get(string _include, string q)
         {
             //create the SQL as a string, in order to be able to add to it with the 'include' queries
             string sql_head = @"SELECT c.Id, c.FirstName, c.LastName";
             string sql_end = @"FROM Customer c";
+            string sql = sql_head + sql_end;
 
-            //?_include=product
-            string sql_product_middle = @", p.Id AS ProductId, p.Price, p.Title, p.[Description], p.Quantity, p.ProductTypeId AS TypeId, pt.Name AS ProductType";
-            string sql_product_end = @"JOIN Product p ON c.Id = p.CustomerId
+            if (_include == "products") //?_include=product
+            {
+                string sql_product_middle = @", p.Id AS ProductId, p.Price, p.Title, p.[Description], p.Quantity, p.ProductTypeId AS TypeId, pt.Name AS ProductType";
+                string sql_product_end = @"JOIN Product p ON c.Id = p.CustomerId
                     JOIN ProductType pt ON p.ProductTypeId = pt.Id";
-            
+                sql = sql_head + sql_product_middle + sql_end + sql_product_end;
+            }
+            else if (_include == "payments") //?_include=payments
+            {
+                string sql_payments_middle = ", pt.Id AS PaymentId, pt.Name, pt.AcctNumber";
+                string sql_payments_end = @"JOIN PaymentType pt ON c.Id = pt.CustomerId
+                    JOIN [Order] o ON pt.Id = o.PaymentTypeId";
+                sql = sql_head + sql_payments_middle + sql_end + sql_payments_end;
+            }
+
+            if (q != null) //?q=
+            {
+                string sql_q_middle = @"WHERE c.LastName LIKE @q
+                    OR c.FirstName LIKE @q";
+                sql = sql_head + sql_end + sql_q_middle;
+            }
 
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    if (_include == "product")
+                     
+                    cmd.CommandText = sql;
+                    if (q != null)
                     {
-                        cmd.CommandText = sql_head + sql_product_middle + sql_end + sql_product_end;
-                    } else if (_include == "payments")
-                    {
+                        cmd.Parameters.Add(new SqlParameter("@q", $"%{q}%"));
 
-                    } else
-                    {
-                        cmd.CommandText = sql_head + sql_end;
                     }
 
                     SqlDataReader reader = await cmd.ExecuteReaderAsync();
@@ -79,7 +93,7 @@ namespace BangazonAPI.Controllers
                             };
                         }
 
-                        if (_include == "product")
+                        if (_include == "products")
                         {
                             customerHash[customerId].ProductsSelling.Add(new Product
                             {
@@ -90,6 +104,16 @@ namespace BangazonAPI.Controllers
                                 ProductType = reader.GetString(reader.GetOrdinal("ProductType")),
                                 Price = reader.GetDouble(reader.GetOrdinal("Price")),
                                 Quantity = reader.GetInt32(reader.GetOrdinal("Quantity"))
+                            });
+                        }
+
+                        if(_include == "payments")
+                        {
+                            customerHash[customerId].PaymentTypesUsed.Add(new PaymentType
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("PaymentId")),
+                                Name = reader.GetString(reader.GetOrdinal("Name")),
+                                AcctNumber = reader.GetInt32(reader.GetOrdinal("AcctNumber"))
                             });
                         }
 
