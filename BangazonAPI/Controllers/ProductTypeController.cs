@@ -11,13 +11,13 @@ using Microsoft.Extensions.Configuration;
 
 namespace BangazonAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
-    public class CustomersController : ControllerBase
+    public class ProductTypeController : ControllerBase
     {
         private readonly IConfiguration _config;
 
-        public CustomersController(IConfiguration config)
+        public ProductTypeController(IConfiguration config)
         {
             _config = config;
         }
@@ -26,8 +26,7 @@ namespace BangazonAPI.Controllers
         {
             get
             {
-                return new SqlConnection(_config.GetConnectionString("Data Source=localhost\\SQLEXPRESS;" +
-                    "Initial Catalog=BangazonApi; Integrated Security=True"));
+                return new SqlConnection(_config.GetConnectionString("DefaultConnection"));
             }
         }
 
@@ -40,26 +39,24 @@ namespace BangazonAPI.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = "Write your SQL statement here to get all customers";
+                    cmd.CommandText = @"SELECT Id, Name FROM ProductType";
                     SqlDataReader reader = await cmd.ExecuteReaderAsync();
 
-                    List<Customer> customers = new List<Customer>();
+                    List<ProductType> productTypes = new List<ProductType>();
                     while (reader.Read())
                     {
-                        Customer customer = new Customer
+                        ProductType productType = new ProductType
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
-                            LastName = reader.GetString(reader.GetOrdinal("LastName")),
-                            // You might have more columns
+                            Name = reader.GetString(reader.GetOrdinal("Name"))
                         };
 
-                        customers.Add(customer);
+                        productTypes.Add(productType);
                     }
 
                     reader.Close();
 
-                    return Ok(customers);
+                    return Ok(productTypes);
                 }
             }
         }
@@ -113,7 +110,7 @@ namespace BangazonAPI.Controllers
                     ";
                     cmd.Parameters.Add(new SqlParameter("@firstName", customer.FirstName));
 
-                    customer.Id = (int) await cmd.ExecuteScalarAsync();
+                    customer.Id = (int)await cmd.ExecuteScalarAsync();
 
                     return CreatedAtRoute("GetCustomer", new { id = customer.Id }, customer);
                 }
