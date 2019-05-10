@@ -96,7 +96,7 @@ namespace TestBangazonAPI
         }
 
         [Fact]
-        public async Task Test_Create_And_Delete_Customer()
+        public async Task Test_Create_Customer()
         {
             using (var client = new APIClientProvider().Client)
             {
@@ -129,43 +129,6 @@ namespace TestBangazonAPI
                 Assert.Equal(HttpStatusCode.Created, response.StatusCode);
                 Assert.Equal("Helen", newHelen.FirstName);
                 Assert.Equal("Chalmers", newHelen.LastName);
-
-                /*
-                    ACT - delete
-                */
-
-                var deleteResponse = await client.DeleteAsync($"/customer/{newHelen.Id}");
-                deleteResponse.EnsureSuccessStatusCode();
-
-                /*
-                    ASSERT - delete
-                */
-
-                Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
-            }
-        }
-
-        [Fact]
-        public async Task Test_Delete_NonExistent_Customer_Fails()
-        {
-            using (var client = new APIClientProvider().Client)
-            {
-                /*
-                   ARRANGE
-               */
-
-                //no arrange for deletes
-
-                /*
-                    ACT
-                */
-                var deleteResponse = await client.DeleteAsync("/customer/600000");
-
-                /*
-                    ASSERT
-                */
-                Assert.False(deleteResponse.IsSuccessStatusCode);
-                Assert.Equal(HttpStatusCode.NotFound, deleteResponse.StatusCode);
             }
         }
 
