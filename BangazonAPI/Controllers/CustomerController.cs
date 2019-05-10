@@ -39,6 +39,7 @@ namespace BangazonAPI.Controllers
             string sql_head = @"SELECT c.Id, c.FirstName, c.LastName";
             string sql_end = @"FROM Customer c";
 
+            //?_include=product
             string sql_product_middle = @", p.Id AS ProductId, p.Price, p.Title, p.[Description], p.Quantity, p.ProductTypeId AS TypeId, pt.Name AS ProductType";
             string sql_product_end = @"JOIN Product p ON c.Id = p.CustomerId
                     JOIN ProductType pt ON p.ProductTypeId = pt.Id";
@@ -63,17 +64,24 @@ namespace BangazonAPI.Controllers
                     SqlDataReader reader = await cmd.ExecuteReaderAsync();
                     List<Customer> customers = new List<Customer>();
 
+                    Dictionary<int, Customer> customerHash = new Dictionary<int, Customer>();
+
                     while (reader.Read())
                     {
-                        Customer customer = new Customer
+                        int customerId = reader.GetInt32(reader.GetOrdinal("Id"));
+                        if (!customerHash.ContainsKey(customerId))
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
-                            LastName = reader.GetString(reader.GetOrdinal("LastName"))
-                        };
+                            customerHash[customerId] = new Customer
+                            {
+                                Id = customerId,
+                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("LastName"))
+                            };
+                        }
+
                         if (_include == "product")
                         {
-                            customer.ProductsSelling.Add(new Product
+                            customerHash[customerId].ProductsSelling.Add(new Product
                             {
                                 Id = reader.GetInt32(reader.GetOrdinal("ProductId")),
                                 Title = reader.GetString(reader.GetOrdinal("Title")),
@@ -85,7 +93,7 @@ namespace BangazonAPI.Controllers
                             });
                         }
 
-                        customers.Add(customer);
+                        customers = customerHash.Values.ToList();
                     }
                     reader.Close();
 
