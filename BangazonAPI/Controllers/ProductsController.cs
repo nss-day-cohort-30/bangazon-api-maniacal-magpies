@@ -173,6 +173,10 @@ namespace BangazonAPI.Controllers
         {
             try
             {
+                if (!ProductExists(id))
+                {
+                    return NotFound();
+                }
                 using (SqlConnection conn = Connection)
                 {
                     conn.Open();
@@ -220,11 +224,35 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        // DELETE api/values/5
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> Delete(int id)
-        //{
-        //}
+        //DELETE api/values/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            if (!ProductExists(id))
+            {
+                return NotFound();
+            }
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                        DELETE FROM Product WHERE Id = @id
+                    ";
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+
+                    int rowsAffected = await cmd.ExecuteNonQueryAsync();
+
+                    if (rowsAffected > 0)
+                    {
+                        return new StatusCodeResult(StatusCodes.Status204NoContent);
+                    }
+
+                    throw new Exception("No rows affected");
+                }
+            }
+        }
 
         private bool ProductExists(int id)
         {
