@@ -22,7 +22,5 @@ namespace BangazonAPI.Models
         public DateTime AssignDate { get; set; }
 
         public DateTime UnassignDate { get; set; }
-
-        
     }
 }
