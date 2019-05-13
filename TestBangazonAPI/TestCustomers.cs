@@ -1,12 +1,3 @@
-<<<<<<< HEAD
-using System;
-using System.Net;
-using Newtonsoft.Json;
-using Xunit;
-using BangazonAPI.Models;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-=======
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Net;
@@ -17,7 +8,6 @@ using Xunit;
 using System.Linq;
 using BangazonAPI.Models;
 
->>>>>>> master
 
 namespace TestBangazonAPI
 {
@@ -31,15 +21,6 @@ namespace TestBangazonAPI
                 /*
                     ARRANGE
                 */
-<<<<<<< HEAD
-
-
-                /*
-                    ACT
-                */
-                var response = await client.GetAsync("/api/customers");
-
-=======
                     
                 //no arrange for gets
               
@@ -50,7 +31,6 @@ namespace TestBangazonAPI
                 var response = await client.GetAsync("/customer");
 
                 response.EnsureSuccessStatusCode();
->>>>>>> master
 
                 string responseBody = await response.Content.ReadAsStringAsync();
                 var customers = JsonConvert.DeserializeObject<List<Customer>>(responseBody);
@@ -62,8 +42,6 @@ namespace TestBangazonAPI
                 Assert.True(customers.Count > 0);
             }
         }
-<<<<<<< HEAD
-=======
 
         [Fact]
         public async Task Test_Get_One_Customer()
@@ -196,6 +174,5 @@ namespace TestBangazonAPI
                 Assert.Equal(newLastName, newSummer.LastName);
             }
         }
->>>>>>> master
     }
 }
