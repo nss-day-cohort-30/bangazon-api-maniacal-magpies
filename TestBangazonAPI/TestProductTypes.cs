@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
+using System.Linq;
 
 namespace TestBangazonAPI
 {
@@ -42,7 +43,7 @@ namespace TestBangazonAPI
                 var productType = JsonConvert.DeserializeObject<ProductType>(responseBody);
 
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                Assert.Equal("Books", productType.Name);
+                Assert.Equal("Jewellery", productType.Name);
                 Assert.NotNull(productType);
             }
         }
@@ -72,7 +73,7 @@ namespace TestBangazonAPI
 
 
                 var response = await client.PostAsync(
-                    "/producttype",
+                    "/ProductType",
                     new StringContent(toysAsJSON, Encoding.UTF8, "application/json")
                 );
 
@@ -85,7 +86,7 @@ namespace TestBangazonAPI
                 Assert.Equal("Toys", newToys.Name);
 
 
-                var deleteResponse = await client.DeleteAsync($"/producttype/{newToys.Id}");
+                var deleteResponse = await client.DeleteAsync($"/productType/{newToys.Id}");
                 deleteResponse.EnsureSuccessStatusCode();
                 Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
             }
@@ -107,6 +108,7 @@ namespace TestBangazonAPI
         public async Task Test_Modify_ProductType()
         {
             // New name to change to and test
+            int id = 1;
             string newName = "Games";
 
             using (var client = new APIClientProvider().Client)
@@ -116,6 +118,7 @@ namespace TestBangazonAPI
                  */
                 ProductType modifiedProductType = new ProductType
                 {
+                    Id = id,
                     Name = newName
                 };
                 var modifiedProductTypeAsJSON = JsonConvert.SerializeObject(modifiedProductType);
