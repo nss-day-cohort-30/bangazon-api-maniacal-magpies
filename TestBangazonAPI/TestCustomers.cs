@@ -8,7 +8,6 @@ using Xunit;
 using System.Linq;
 using BangazonAPI.Models;
 
-
 namespace TestBangazonAPI
 {
     public class TestCustomers
@@ -21,9 +20,9 @@ namespace TestBangazonAPI
                 /*
                     ARRANGE
                 */
-                    
+
                 //no arrange for gets
-              
+
                 /*
                     ACT
                 */
@@ -102,7 +101,7 @@ namespace TestBangazonAPI
         {
             using (var client = new APIClientProvider().Client)
             {
-                /* 
+                /*
                     ARRANGE
                 */
                  Customer helen = new Customer
@@ -125,7 +124,7 @@ namespace TestBangazonAPI
                 string responseBody = await response.Content.ReadAsStringAsync();
                 var newHelen = JsonConvert.DeserializeObject<Customer>(responseBody);
 
-                /* 
+                /*
                     ASSERT
                 */
                 Assert.Equal(HttpStatusCode.Created, response.StatusCode);
