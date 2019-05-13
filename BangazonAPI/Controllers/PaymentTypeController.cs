@@ -43,7 +43,7 @@ namespace BangazonAPI.Controllers
                                     c.Id, c.FirstName, c.LastName
                                     FROM PaymentType pt
                                     JOIN Customer c ON pt.CustomerId = c.Id";
-                    SqlDataReader reader = cmd.ExecuteReader();
+                    SqlDataReader reader = await cmd.ExecuteReaderAsync();
                     List<PaymentType> paymentTypes = new List<PaymentType>();
 
                     while (reader.Read())
@@ -90,7 +90,7 @@ namespace BangazonAPI.Controllers
                                     JOIN Customer c ON pt.CustomerId = c.Id 
                                     WHERE pt.Id = @id";
                     cmd.Parameters.Add(new SqlParameter("@id", id));
-                    SqlDataReader reader = cmd.ExecuteReader();
+                    SqlDataReader reader = await cmd.ExecuteReaderAsync();
 
                     PaymentType paymentType = null;
 
@@ -159,7 +159,7 @@ namespace BangazonAPI.Controllers
                         cmd.Parameters.Add(new SqlParameter("@customerId", paymentType.CustomerId));
                         cmd.Parameters.Add(new SqlParameter("@id", id));
 
-                        int rowsAffected = cmd.ExecuteNonQuery();
+                        int rowsAffected = await cmd.ExecuteNonQueryAsync();
                         if (rowsAffected > 0)
                         {
                             return new StatusCodeResult(StatusCodes.Status204NoContent);
@@ -194,7 +194,7 @@ namespace BangazonAPI.Controllers
                         cmd.CommandText = @"DELETE FROM PaymentType WHERE Id = @id";
                         cmd.Parameters.Add(new SqlParameter("@id", id));
 
-                        int rowsAffected = cmd.ExecuteNonQuery();
+                        int rowsAffected = await cmd.ExecuteNonQueryAsync();
                         if (rowsAffected > 0)
                         {
                             return new StatusCodeResult(StatusCodes.Status204NoContent);

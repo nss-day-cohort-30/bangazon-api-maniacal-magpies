@@ -16,6 +16,9 @@ namespace BangazonAPI.Models
         [Required]
         public int Budget { get; set; }
 
-        
+        //added list to allow departments to display all employees
+        public List<Employee> Employees { get; set; } 
+
+
     }
 }
