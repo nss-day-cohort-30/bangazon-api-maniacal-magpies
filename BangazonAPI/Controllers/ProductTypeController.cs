@@ -65,6 +65,10 @@ namespace BangazonAPI.Controllers
         [HttpGet("{id}", Name = "GetProductType")]
         public async Task<IActionResult> Get([FromRoute]int id)
         {
+            if(!ProductTypeExists(id))
+            {
+                return new StatusCodeResult(StatusCodes.Status404NotFound);
+            }
             using (SqlConnection conn = Connection)
             {
                 conn.Open();

@@ -121,7 +121,7 @@ namespace TestBangazonAPI
                 var modifiedProductTypeAsJSON = JsonConvert.SerializeObject(modifiedProductType);
 
                 var response = await client.PutAsync(
-                    "/productType/1",
+                    "/producttype/1",
                     new StringContent(modifiedProductTypeAsJSON, Encoding.UTF8, "application/json")
                 );
                 response.EnsureSuccessStatusCode();
