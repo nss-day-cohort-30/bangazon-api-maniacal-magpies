@@ -8,6 +8,7 @@ using Xunit;
 using System.Linq;
 using BangazonAPI.Models;
 
+
 namespace TestBangazonAPI
 {
     public class TestCustomers
@@ -22,10 +23,11 @@ namespace TestBangazonAPI
                 */
                     
                 //no arrange for gets
-
+              
                 /*
                     ACT
                 */
+
                 var response = await client.GetAsync("/customer");
 
                 response.EnsureSuccessStatusCode();
@@ -172,6 +174,5 @@ namespace TestBangazonAPI
                 Assert.Equal(newLastName, newSummer.LastName);
             }
         }
-
     }
 }
