@@ -61,14 +61,18 @@ namespace BangazonAPI.Controllers
                             {
                                 Id = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
                                 Name = reader.GetString(reader.GetOrdinal("DepartmentName"))
-                            },
-                            Computer = new Computer
+                            }
+                        };
+                        if (!reader.IsDBNull(reader.GetOrdinal("ComputerId")))
+                        {
+                            Computer computer = new Computer
                             {
                                 Id = reader.GetInt32(reader.GetOrdinal("ComputerId")),
                                 Make = reader.GetString(reader.GetOrdinal("Make")),
                                 Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))
-                            }
-                        };
+                            };
+                            employee.Computer = computer;
+                        }
                         employees.Add(employee);
                     }
                     reader.Close();
@@ -115,14 +119,18 @@ namespace BangazonAPI.Controllers
                                     {
                                         Id = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
                                         Name = reader.GetString(reader.GetOrdinal("DepartmentName"))
-                                    },
-                                    Computer = new Computer
+                                    }
+                                };
+                                if (!reader.IsDBNull(reader.GetOrdinal("ComputerId")))
+                                {
+                                    Computer computer = new Computer
                                     {
                                         Id = reader.GetInt32(reader.GetOrdinal("ComputerId")),
                                         Make = reader.GetString(reader.GetOrdinal("Make")),
                                         Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))
-                                    }
-                                };
+                                    };
+                                    employee.Computer = computer;
+                                }
                             }
                         }
                         reader.Close();
