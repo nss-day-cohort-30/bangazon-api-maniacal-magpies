@@ -161,11 +161,12 @@ namespace BangazonAPI.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"INSERT INTO Employee (FirstName, LastName)
+                    cmd.CommandText = @"INSERT INTO Employee (FirstName, LastName, DepartmentId)
                                         OUTPUT INSERTED.Id
-                                        VALUES (@FirstName, @LastName)";
+                                        VALUES (@FirstName, @LastName, @DepartmentId)";
                     cmd.Parameters.Add(new SqlParameter("@FirstName", employee.FirstName));
                     cmd.Parameters.Add(new SqlParameter("@LastName", employee.LastName));
+                    cmd.Parameters.Add(new SqlParameter("@DepartmentId", employee.DepartmentId));
 
                     int newId = (int)await cmd.ExecuteScalarAsync();
                     employee.Id = newId;
@@ -186,9 +187,11 @@ namespace BangazonAPI.Controllers
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
                         cmd.CommandText = @"UPDATE Employee SET FirstName = @FirstName,
-                                            LastName = @LastName WHERE Id = @id";
+                                            LastName = @LastName, DepartmentId = @DepartmentId
+                                            WHERE Id = @id";
                         cmd.Parameters.Add(new SqlParameter("@FirstName", employee.FirstName));
                         cmd.Parameters.Add(new SqlParameter("@LastName", employee.LastName));
+                        cmd.Parameters.Add(new SqlParameter("@DepartmentId", employee.DepartmentId));
                         cmd.Parameters.Add(new SqlParameter("@id", id));
 
                         int rowsAffected = await cmd.ExecuteNonQueryAsync();
