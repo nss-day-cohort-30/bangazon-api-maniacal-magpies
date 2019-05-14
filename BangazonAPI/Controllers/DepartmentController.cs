@@ -31,74 +31,103 @@ namespace BangazonAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get_All_Departments(int budget, string departmentName)
+        //this function gets a List of all Customers in the database
+        public async Task<IActionResult> Get(string _include, string _filter, string q)
         {
-            string sql = @"SELECT 
-                            d.Id, d.Name, d.budget,
-                            e.Id, e.FirstName, e.LastName,
-                            e.DepartmentId, e.IsSupervisor
-                        FROM Department d
-                        JOIN Employee e ON e.DepartmentId = d.Id
-                        WHERE 2 = 2";                   
-                       
+            //create the SQL as a string, in order to be able to add to it with the 'include' queries
+            string sql = "SELECT d.Id, d.[Name], d.Budget, e.Id, e.FirstName, e.LastName, e.DepartmentId, e.IsSupervisor, JOIN Employee e ON d.Id = e.DepartmentId, FROM Department d";
+            //string sql_end = "FROM Department d";
+            //string sql = $"{sql_head} {sql_end}";
 
-            if (departmentName != null)
+            //if (_include == "employees") //?_include=employees
+            //{
+            //    string sql_employee_middle = @"e.Id, e.FirstName, e.LastName, e.DepartmentId, e.IsSupervisor";
+            //    string sql_employee_end = @"JOIN Employee e ON d.Id = e.DepartmentId";
+                                                
+            //    sql = $"{sql_head} {sql_employee_middle} {sql_end} {sql_employee_end}";
+            }
+            if (_filter == "budget&_gt=300000") //?_include=budget over 300000
             {
-                sql = $"{sql} AND d.Name = @departmentName";
+                string sql_budget_end = @"WHERE d.Budget >= 300000";
+                sql = $"{sql_head} {sql_end} {sql_budget_end}";
             }
 
-            if (budget != 0)
+            if (q != null) //?q=
             {
-                sql = $@"{sql} AND d.budget >= @budget";         
-                    
+                string sql_q_end = @" WHERE d.Name = @q";
+                sql = $"{sql_q_end}";
             }
 
-           using (SqlConnection conn = Connection)
+            using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
+
                     cmd.CommandText = sql;
-                    if (departmentName != null)
+                    if (q != null)
                     {
-                        cmd.Parameters.Add(new SqlParameter("@departmentName", $"%{departmentName}%"));
-                    }
-                    if (budget != 0)
-                    {
-                        cmd.Parameters.Add(new SqlParameter("@budget", $"%{budget}%"));
+                        cmd.Parameters.Add(new SqlParameter("@q", $"%{q}%"));
 
                     }
+
                     SqlDataReader reader = await cmd.ExecuteReaderAsync();
+                    List<Department> departments = new List<Department>();
 
-                    Dictionary<int, Department> departmentHash = new Dictionary<int, Department>();
+                    Dictionary<int, Department> DepartmentHash = new Dictionary<int, Department>();
 
                     while (reader.Read())
                     {
                         int departmentId = reader.GetInt32(reader.GetOrdinal("Id"));
-
-                        if (!departmentHash.ContainsKey(departmentId))
+                        if (!DepartmentHash.ContainsKey(departmentId))
                         {
-                            departmentHash[departmentId] = new Department
+                            DepartmentHash[departmentId] = new Department
                             {
-                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                Id = departmentId,
                                 Name = reader.GetString(reader.GetOrdinal("Name")),
                                 Budget = reader.GetInt32(reader.GetOrdinal("Budget")),
-                                Employees = new List<Employee>
-                                {
-                                    
-                                }
-                                                               
+                                Employees = new List<Employee>(),                               
                             };
-                        }
+                        };
 
-                     }
-                    List<Department> departments = departmentHash.Values.ToList();
+                        if (_include == "employees")
+                        {
+                            if (!reader.IsDBNull(reader.GetOrdinal("Title")))
+                            {
+                                DepartmentHash[departmentId].Employees.Add(new Employee
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                    FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                    LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                    DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
+                                    IsSuperVisor = reader.GetBoolean(reader.GetOrdinal("IsSuperVisor")),
+                                });
+                            }
+                        };
+
+                        if (_include == "filter")
+                        {
+                            if (!reader.IsDBNull(reader.GetOrdinal("Name")))
+                            {
+                                DepartmentHash[departmentId] = new Department
+                                {
+                                    Id = departmentId,
+                                    Name = reader.GetString(reader.GetOrdinal("Name")),
+                                    Budget = reader.GetInt32(reader.GetOrdinal("Budget")),
+                                   
+                                };
+                            }
+                        };
+
+                        departments = DepartmentHash.Values.ToList();
+                    }
                     reader.Close();
 
                     return Ok(departments);
                 }
             }
         }
+
 
         //[HttpGet("{id}", Name = "GetPaymentType")]
         //public async Task<IActionResult> Get([FromRoute] int id)
