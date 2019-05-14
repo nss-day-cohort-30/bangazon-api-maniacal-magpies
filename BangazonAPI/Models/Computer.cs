@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 
 namespace BangazonAPI.Models
@@ -25,7 +22,5 @@ namespace BangazonAPI.Models
         public DateTime AssignDate { get; set; }
 
         public DateTime UnassignDate { get; set; }
-
-        
     }
 }
