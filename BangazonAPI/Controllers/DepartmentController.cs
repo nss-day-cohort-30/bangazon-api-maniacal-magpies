@@ -35,29 +35,43 @@ namespace BangazonAPI.Controllers
         public async Task<IActionResult> Get(string _include, string _filter, string q)
         {
             //create the SQL as a string, in order to be able to add to it with the 'include' queries
-            string sql = "SELECT d.Id, d.[Name], d.Budget, e.Id, e.FirstName, e.LastName, e.DepartmentId, e.IsSupervisor, JOIN Employee e ON d.Id = e.DepartmentId, FROM Department d";
-            //string sql_end = "FROM Department d";
-            //string sql = $"{sql_head} {sql_end}";
+            //string sql = 
+            //string sql = @"SELECT d.Id, d.[Name], d.Budget, e.Id, e.FirstName, e.LastName, 
+            //              e.DepartmentId, e.IsSupervisor
+            //              FROM Department d
+            //              JOIN Employee e ON d.Id = e.Department.Id
+            //              WHERE 2=2";
 
-            //if (_include == "employees") //?_include=employees
-            //{
-            //    string sql_employee_middle = @"e.Id, e.FirstName, e.LastName, e.DepartmentId, e.IsSupervisor";
-            //    string sql_employee_end = @"JOIN Employee e ON d.Id = e.DepartmentId";
-                                                
-            //    sql = $"{sql_head} {sql_employee_middle} {sql_end} {sql_employee_end}";
+            string sql_head = @"SELECT d.Id, d.[Name], d.Budget";
+            string sql_end = "FROM Department d";
+            string sql = $"{sql_head} {sql_end}";
+                       
+            if (_include == "employees") //?_include=employees
+            {
+                
+                
+                string sql_employee_middle = @", e.Id, e.FirstName, e.LastName, e.DepartmentId, e.IsSupervisor";
+                string sql_employee_end = @"JOIN Employee e ON d.Id = e.DepartmentId";
+                                           
+
+                sql = $"{sql_head} {sql_employee_middle} {sql_end} {sql_employee_end}";
+                Console.WriteLine("LoOOOOOK", sql);
+
+                    if (q != null)
+                {
+                    sql = $"{sql_head} {sql_employee_middle} {sql_end} {sql_employee_end} AND d.[Name] == @q";
+                }
             }
-            if (_filter == "budget&_gt=300000") //?_include=budget over 300000
+            else if (_filter == "300000") //?_include=budget over 300000
             {
                 string sql_budget_end = @"WHERE d.Budget >= 300000";
                 sql = $"{sql_head} {sql_end} {sql_budget_end}";
             }
-
-            if (q != null) //?q=
-            {
-                string sql_q_end = @" WHERE d.Name = @q";
-                sql = $"{sql_q_end}";
-            }
-
+            //else if (q != null)
+            //{
+            //    sql = $"{sql} AND d.[Name] == @q";
+            //}
+          
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
@@ -65,6 +79,7 @@ namespace BangazonAPI.Controllers
                 {
 
                     cmd.CommandText = sql;
+
                     if (q != null)
                     {
                         cmd.Parameters.Add(new SqlParameter("@q", $"%{q}%"));
@@ -92,17 +107,14 @@ namespace BangazonAPI.Controllers
 
                         if (_include == "employees")
                         {
-                            if (!reader.IsDBNull(reader.GetOrdinal("Title")))
-                            {
-                                DepartmentHash[departmentId].Employees.Add(new Employee
+                            DepartmentHash[departmentId].Employees.Add(new Employee
                                 {
                                     Id = reader.GetInt32(reader.GetOrdinal("Id")),
                                     FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
                                     LastName = reader.GetString(reader.GetOrdinal("LastName")),
                                     DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
                                     IsSuperVisor = reader.GetBoolean(reader.GetOrdinal("IsSuperVisor")),
-                                });
-                            }
+                                });                            
                         };
 
                         if (_include == "filter")
