@@ -1,10 +1,11 @@
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28803.352
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BangazonAPI", "BangazonAPI\BangazonAPI.csproj", "{EB7B7CFE-80A4-48EF-ACB6-AA58EC3933B0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestBangazonAPI", "TestBangazonAPI\TestBangazonAPI.csproj", "{C5795B65-6006-4313-9013-24641E5705C1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestBangazonAPI", "TestBangazonAPI\TestBangazonAPI.csproj", "{CDACDB8D-0E66-402F-AEC4-8D8F85DAC384}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -28,18 +29,18 @@ Global
 		{EB7B7CFE-80A4-48EF-ACB6-AA58EC3933B0}.Release|x64.Build.0 = Release|Any CPU
 		{EB7B7CFE-80A4-48EF-ACB6-AA58EC3933B0}.Release|x86.ActiveCfg = Release|Any CPU
 		{EB7B7CFE-80A4-48EF-ACB6-AA58EC3933B0}.Release|x86.Build.0 = Release|Any CPU
-		{C5795B65-6006-4313-9013-24641E5705C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C5795B65-6006-4313-9013-24641E5705C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C5795B65-6006-4313-9013-24641E5705C1}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{C5795B65-6006-4313-9013-24641E5705C1}.Debug|x64.Build.0 = Debug|Any CPU
-		{C5795B65-6006-4313-9013-24641E5705C1}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{C5795B65-6006-4313-9013-24641E5705C1}.Debug|x86.Build.0 = Debug|Any CPU
-		{C5795B65-6006-4313-9013-24641E5705C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C5795B65-6006-4313-9013-24641E5705C1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C5795B65-6006-4313-9013-24641E5705C1}.Release|x64.ActiveCfg = Release|Any CPU
-		{C5795B65-6006-4313-9013-24641E5705C1}.Release|x64.Build.0 = Release|Any CPU
-		{C5795B65-6006-4313-9013-24641E5705C1}.Release|x86.ActiveCfg = Release|Any CPU
-		{C5795B65-6006-4313-9013-24641E5705C1}.Release|x86.Build.0 = Release|Any CPU
+		{CDACDB8D-0E66-402F-AEC4-8D8F85DAC384}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CDACDB8D-0E66-402F-AEC4-8D8F85DAC384}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CDACDB8D-0E66-402F-AEC4-8D8F85DAC384}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CDACDB8D-0E66-402F-AEC4-8D8F85DAC384}.Debug|x64.Build.0 = Debug|Any CPU
+		{CDACDB8D-0E66-402F-AEC4-8D8F85DAC384}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CDACDB8D-0E66-402F-AEC4-8D8F85DAC384}.Debug|x86.Build.0 = Debug|Any CPU
+		{CDACDB8D-0E66-402F-AEC4-8D8F85DAC384}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CDACDB8D-0E66-402F-AEC4-8D8F85DAC384}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CDACDB8D-0E66-402F-AEC4-8D8F85DAC384}.Release|x64.ActiveCfg = Release|Any CPU
+		{CDACDB8D-0E66-402F-AEC4-8D8F85DAC384}.Release|x64.Build.0 = Release|Any CPU
+		{CDACDB8D-0E66-402F-AEC4-8D8F85DAC384}.Release|x86.ActiveCfg = Release|Any CPU
+		{CDACDB8D-0E66-402F-AEC4-8D8F85DAC384}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
