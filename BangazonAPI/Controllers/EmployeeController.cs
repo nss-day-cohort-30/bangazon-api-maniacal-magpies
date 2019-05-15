@@ -11,6 +11,16 @@ using Microsoft.Extensions.Configuration;
 
 namespace BangazonAPI.Controllers
 {
+    /// <summary>
+    /// EmployeeController: A class allow developers to access the Employee resource of the BangazonAPI database.
+    /// Author: Panya Farnette
+    /// Methods: 
+    ///     Get -- used to get a List of all Employees in the database
+    ///     GetEmployee -- used to get a single Employee from the database
+    ///     Post -- used to add a single Employee to the database
+    ///     Put -- used to update a single Employee in the database
+    ///     EmployeeExists -- used for verification
+    /// </summary>
     [Route("[controller]")]
     [ApiController]
     public class EmployeeController : ControllerBase
@@ -39,7 +49,7 @@ namespace BangazonAPI.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-
+                    //the SQL syntax, including data for Employee's Department and assigned Computer if they have one
                     cmd.CommandText = $@"SELECT e.Id AS EmployeeId, e.FirstName, e.LastName, 
                                 e.DepartmentId, d.Name AS DepartmentName, 
                                 c.Id AS ComputerId, c.Make, c.Manufacturer FROM Employee e
@@ -63,6 +73,7 @@ namespace BangazonAPI.Controllers
                                 Name = reader.GetString(reader.GetOrdinal("DepartmentName"))
                             }
                         };
+                        //check if the Employee has a Computer assigned to them -- if not, leave employee.Computer as null
                         if (!reader.IsDBNull(reader.GetOrdinal("ComputerId")))
                         {
                             Computer computer = new Computer
@@ -93,6 +104,7 @@ namespace BangazonAPI.Controllers
                     conn.Open();
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
+                        //the SQL syntax, including data for Employee's Department and assigned Computer if they have one
                         cmd.CommandText = $@"SELECT e.Id AS EmployeeId, e.FirstName, e.LastName, 
                                 e.DepartmentId, d.Name AS DepartmentName, 
                                 c.Id AS ComputerId, c.Make, c.Manufacturer FROM Employee e
@@ -121,6 +133,7 @@ namespace BangazonAPI.Controllers
                                         Name = reader.GetString(reader.GetOrdinal("DepartmentName"))
                                     }
                                 };
+                                //check if the Employee has a Computer assigned to them -- if not, leave employee.Computer as null
                                 if (!reader.IsDBNull(reader.GetOrdinal("ComputerId")))
                                 {
                                     Computer computer = new Computer
@@ -194,6 +207,7 @@ namespace BangazonAPI.Controllers
                     conn.Open();
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
+                        //remember that DepartmentId in the database CANNOT be null
                         cmd.CommandText = @"UPDATE Employee SET FirstName = @FirstName,
                                             LastName = @LastName, DepartmentId = @DepartmentId
                                             WHERE Id = @id";

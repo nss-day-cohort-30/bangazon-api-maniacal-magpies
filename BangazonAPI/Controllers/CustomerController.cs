@@ -11,6 +11,16 @@ using Microsoft.Extensions.Configuration;
 
 namespace BangazonAPI.Controllers
 {
+    /// <summary>
+    /// CustomerController: A class allow developers to access the Customer resource of the BangazonAPI database.
+    /// Author: Panya Farnette
+    /// Methods: 
+    ///     Get -- used to get a List of all Customers in the database
+    ///     GetCustomer -- used to get a single Customer from the database
+    ///     Post -- used to add a single Customer to the database
+    ///     Put -- used to update a single Customer in the database
+    ///     CustomerExists -- used for verification
+    /// </summary>
     [Route("[controller]")]
     [ApiController]
     public class CustomerController : ControllerBase
@@ -34,7 +44,7 @@ namespace BangazonAPI.Controllers
         //this function gets a List of all Customers in the database
         public async Task<IActionResult> Get(string _include, string q)
         {
-            //create the SQL as a string, in order to be able to add to it with the 'include' queries
+            //create the SQL as a string, in order to be able to add to it for query strings
             string sql_head = "SELECT c.Id, c.FirstName, c.LastName";
             string sql_end = "FROM Customer c";
             string sql = $"{sql_head} {sql_end}";
