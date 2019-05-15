@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace BangazonAPI.Models
 {
+    //This class provides the model for paymentTypes. Added the customer object on because each payment type is associated with a customer
     public class PaymentType
     {
         public int Id { get; set; }
