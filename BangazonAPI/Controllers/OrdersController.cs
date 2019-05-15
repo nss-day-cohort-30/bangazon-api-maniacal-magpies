@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Threading.Tasks;
 using BangazonAPI.Models;
 using Microsoft.AspNetCore.Http;
@@ -43,20 +44,20 @@ namespace BangazonAPI.Controllers
 
                     //default SQL statement
                     string sql_select = @"SELECT o.Id, o.CustomerId, o.PaymentTypeId,
-                                        pt.Id PaymentId, pt.AcctNumber PaymentAccount, pt.Name PaymentName
+                                        pt.AcctNumber PaymentAccount, pt.Name PaymentName
                                         ";
-                                        
+
                     string sql_join = @" FROM [Order] o LEFT JOIN PaymentType pt ON pt.Id = o.PaymentTypeId";
                     string sql_end = @" WHERE 1=1";
 
                     //'completed' query will include completed(true) or non-completed(false) orders
                     if (completed != null)
                     {
-                        if (completed == false)
+                        if (completed == false)   // ?completed=false
                         {
                             sql_end += " AND o.PaymentTypeId IS NULL";
                         }
-                        else
+                        else   // ?completed=true
                         {
                             sql_end += " AND o.PaymentTypeId IS NOT NULL";
                         }
@@ -69,22 +70,21 @@ namespace BangazonAPI.Controllers
 
                     if (_include != null)
                     {
-                        if (_include == "customers")
+                        if (_include == "customers")  // ?_include=customers
                         {
                             includeCustomers = true;
                             sql_select += ", c.FirstName, c.LastName";
                             sql_join += " JOIN Customer c ON c.Id = o.CustomerId";
                         }
-                        else if (_include == "products")
+                        else if (_include == "products")  // ?_include=products
                         {
                             includeProducts = true;
-                            sql_select += "";
+                            sql_select += @", c.FirstName, c.LastName,
+                                          p.Id ProductId, p.Price, p.Title ProductTitle, p.Description ProductDescription, p.Quantity ProductQuantity, p.CustomerId SellerId
+                                          prodtype.Id ProductTypeId, prodtype.Name ProductTypeName";
                         }
-                        //TODO: if an invalid query is used with 'include' throw an error
-                        else
-                        {
-                            _include = null;
-                        }
+                        //TODO: if an invalid query is used with 'include' throw an error?
+
                     }
 
                     //construct the final SQL statement based on queries used
@@ -94,10 +94,13 @@ namespace BangazonAPI.Controllers
 
                     SqlDataReader reader = await cmd.ExecuteReaderAsync();
 
-                    List<Order> orders = new List<Order>();
+                    Dictionary<int, Order> ordersHash = new Dictionary<int, Order>();
 
                     while (reader.Read())
                     {
+                        //id of current order for hash usage
+                        int orderId = reader.GetInt32(reader.GetOrdinal("Id"));
+
                         //set initial values to null, to be changed based on queries used
                         int? paymentTypeId = null;
                         PaymentType payment = null;
@@ -118,7 +121,7 @@ namespace BangazonAPI.Controllers
                             };
                         }
 
-                        //check for customer query, and initialize
+                        //check if customers should be included, and initialize
                         if (includeCustomers)
                         {
                             customer = new Customer
@@ -131,19 +134,37 @@ namespace BangazonAPI.Controllers
                             };
                         }
 
-                        //initialize the new Order
-                        Order order = new Order
+                        if (includeProducts)
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
-                            Customer = customer,
-                            PaymentTypeId = paymentTypeId,
-                            Payment = payment,
-                            Products = products
-                        };
+                            products = new List<Product>();
+                        }
 
-                        orders.Add(order);
+                        //initialize the new Order in the hash OR add new product to order already in the hash
+                        if (!ordersHash.ContainsKey(orderId))
+                        {
+                            ordersHash[orderId] = new Order
+                            {
+                                Id = orderId,
+                                CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
+                                Customer = customer,
+                                PaymentTypeId = paymentTypeId,
+                                Payment = payment,
+                                Products = products
+                            };
+                        }
+
+                        //check if products should be included, and use hash table to populate List
+                        if (includeProducts)
+                        {
+                            ordersHash[orderId].Products.Add(new Product
+                            {
+
+                            });
+                        }
+
                     }
+
+                    List<Order> orders = ordersHash.Values.ToList();
 
                     reader.Close();
 
