@@ -32,7 +32,7 @@ namespace BangazonAPI.Controllers
 
         [HttpGet]
         //this function gets a List of all Customers in the database
-        public async Task<IActionResult> Get(string _include, string q)
+        public async Task<IActionResult> Get(string _include, string q, string active)
         {
             //create the SQL as a string, in order to be able to add to it with the 'include' queries
             string sql_head = "SELECT c.Id, c.FirstName, c.LastName";
@@ -56,9 +56,16 @@ namespace BangazonAPI.Controllers
 
             if (q != null) //?q=
             {
-                string sql_q_middle = @" WHERE c.LastName LIKE @q
+                string sql_q_end = @" WHERE c.LastName LIKE @q
                     OR c.FirstName LIKE @q";
-                sql = $"{sql_head} {sql_end} {sql_q_middle}";
+                sql = $"{sql_head} {sql_end} {sql_q_end}";
+            }
+
+            if (active == "false")
+            {
+                string sql_inactive_end = @"LEFT JOIN [Order] o ON c.Id = o.CustomerId
+                            WHERE o.CustomerId IS NULL";
+                sql = $"{sql_head} {sql_end} {sql_inactive_end}";
             }
 
             using (SqlConnection conn = Connection)
