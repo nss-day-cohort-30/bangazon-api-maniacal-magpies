@@ -265,7 +265,7 @@ namespace BangazonAPI.Controllers
             }
         }
         [HttpPut("{id}")]
-        //this function updates a single Department in the database
+        //this function updates a Department in the database based 
         public async Task<IActionResult> Put([FromRoute] int id, [FromBody] Department department)
         {
             try
@@ -290,6 +290,7 @@ namespace BangazonAPI.Controllers
                     }
                 }
             }
+            //if the department doesn't exist a 404 error code will be presented
             catch (Exception)
             {
                 if (!DepartmentExists(id))

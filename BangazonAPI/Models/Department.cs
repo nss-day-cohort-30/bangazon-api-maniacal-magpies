@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace BangazonAPI.Models
 {
+    //This class provides the modl for departments. Added th employee list on in order to access employees from department. Employee holds the foreign ky for department
     public class Department
     {
         public int Id { get; set; }
