@@ -173,5 +173,97 @@ namespace TestBangazonAPI
                 Assert.Equal(newLastName, newSummer.LastName);
             }
         }
+
+        [Fact]
+        public async Task Test_Include_Payments()
+        {
+            using (var client = new APIClientProvider().Client)
+            {
+                /*
+                    ARRANGE
+                */
+
+                //no arrange for gets
+
+                /*
+                    ACT
+                */
+                var response = await client.GetAsync("/customer/1?_include=payments");
+
+                response.EnsureSuccessStatusCode();
+
+                string responseBody = await response.Content.ReadAsStringAsync();
+                var customer = JsonConvert.DeserializeObject<Customer>(responseBody);
+
+                /*
+                    ASSERT
+                */
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.Equal("Summer", customer.FirstName);
+                Assert.Equal("Pinnacle", customer.PaymentTypesUsed[0].Name);
+                Assert.NotNull(customer);
+            }
+        }
+
+        [Fact]
+        public async Task Test_Include_Products()
+        {
+            using (var client = new APIClientProvider().Client)
+            {
+                /*
+                    ARRANGE
+                */
+
+                //no arrange for gets
+
+                /*
+                    ACT
+                */
+                var response = await client.GetAsync("/customer/1?_include=products");
+
+                response.EnsureSuccessStatusCode();
+
+                string responseBody = await response.Content.ReadAsStringAsync();
+                var customer = JsonConvert.DeserializeObject<Customer>(responseBody);
+
+                /*
+                    ASSERT
+                */
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.Equal("Summer", customer.FirstName);
+                Assert.Equal("Electronic Thingy", customer.ProductsSelling[0].Title);
+                Assert.NotNull(customer);
+            }
+        }
+
+        [Fact]
+        public async Task Test_Active_False()
+        {
+            using (var client = new APIClientProvider().Client)
+            {
+                /*
+                    ARRANGE
+                */
+
+                //no arrange for gets
+
+                /*
+                    ACT
+                */
+                var response = await client.GetAsync("/customer?active=false");
+
+                response.EnsureSuccessStatusCode();
+
+                string responseBody = await response.Content.ReadAsStringAsync();
+                var customers = JsonConvert.DeserializeObject<List<Customer>>(responseBody);
+
+                /*
+                    ASSERT
+                */
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.True(customers.Count > 0);
+                Assert.Equal("Kieran", customers[0].FirstName);
+            }
+        }
     }
 }
