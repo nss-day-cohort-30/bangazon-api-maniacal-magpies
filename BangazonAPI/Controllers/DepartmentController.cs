@@ -31,14 +31,16 @@ namespace BangazonAPI.Controllers
         }
 
         [HttpGet]
-        //this function gets a List of all Customers in the database
+        //this function gets a List of all departments and displays a list of employes by department using parameters in the database
         public async Task<IActionResult> Get(string _include, string _filter, string q)
         {
+            //set portions of the sql statements equal to variables to use i nthe if statements
             string sql_head = @"SELECT d.Id, d.[Name], d.Budget";
             string sql_end = "FROM Department d";
             string sql = $"{sql_head} {sql_end}";
-                       
-            if (_include == "employees") //?_include=employees
+
+            //?_include=employees
+            if (_include == "employees") 
             {
                 
                 
@@ -48,12 +50,14 @@ namespace BangazonAPI.Controllers
 
                 sql = $"{sql_head} {sql_employee_middle} {sql_end} {sql_employee_end}";
 
+                //nested this if statement to utilize the sql variabl within the if above
                 if (q != null)
                 {
                     sql = $@"{sql_head} {sql_employee_middle} {sql_end} {sql_employee_end} AND d.Name = '{@q}'";
                 }
             }
-            else if (_filter == "300000") //?_include=budget over 300000
+            //?_include=budget over 300000
+            else if (_filter == "300000") 
             {
                 string sql_budget_end = @"WHERE d.Budget >= 300000";
                 sql = $"{sql_head} {sql_end} {sql_budget_end}";
@@ -69,13 +73,17 @@ namespace BangazonAPI.Controllers
 
                     if (q != null)
                     {
+                        //passing the q variable to the sql statment if it is not null
                         cmd.Parameters.Add(new SqlParameter("@q", $"%{q}%"));
 
                     }
 
                     SqlDataReader reader = await cmd.ExecuteReaderAsync();
+
+                    //creating a list based off the Department model named departments which will hold the DepartmentHash values. Line 129 pass the values in 
                     List<Department> departments = new List<Department>();
 
+                    //dictionary created to hold the department and ID created below
                     Dictionary<int, Department> DepartmentHash = new Dictionary<int, Department>();
 
                     while (reader.Read())
@@ -91,9 +99,10 @@ namespace BangazonAPI.Controllers
                                 Employees = new List<Employee>(),                               
                             };
                         };
-
+                        //outlines what to display if the _include is utilized itt adds the DepartmentHash 
                         if (_include == "employees")
                         {
+                            //adds the Employee object below to the list of employees on the department model based off of ID
                             DepartmentHash[departmentId].Employees.Add(new Employee
                                 {
                                     Id = reader.GetInt32(reader.GetOrdinal("Id")),
@@ -103,11 +112,12 @@ namespace BangazonAPI.Controllers
                                     IsSuperVisor = reader.GetBoolean(reader.GetOrdinal("IsSuperVisor")),
                                 });                            
                         };
-
+                        //outlines what to display if the _filer is utilized
                         if (_filter == "300000")
                         {
                             if (!reader.IsDBNull(reader.GetOrdinal("Name")))
                             {
+                                //creates a new department that includes the budget and add to the Departmenthash
                                 DepartmentHash[departmentId] = new Department
                                 {
                                     Id = departmentId,
@@ -117,17 +127,17 @@ namespace BangazonAPI.Controllers
                                 };
                             }
                         };
-
+                        //departments list is set equal to the DepartmentHash.Values.ToList method to create a new list of objects in departments
                         departments = DepartmentHash.Values.ToList();
                     }
                     reader.Close();
-
+                    //returning the list
                     return Ok(departments);
                 }
             }
         }
         [HttpGet("{id}", Name = "GetDepartment")]
-        //this function gets a single Customer from the database, by id
+        //this function gets a single Department from the database, by id
         public async Task<IActionResult> Get([FromRoute] int id, string _include, string _filter, string q)
         {
             try
@@ -234,7 +244,7 @@ namespace BangazonAPI.Controllers
             }
         }
         [HttpPost]
-        //this function adds a single Customer to the database
+        //this function adds a single Department to the database
         public async Task<IActionResult> Post([FromBody] Department department)
         {
             using (SqlConnection conn = Connection)
@@ -255,7 +265,7 @@ namespace BangazonAPI.Controllers
             }
         }
         [HttpPut("{id}")]
-        //this function updates a single Customer in the database
+        //this function updates a single Department in the database
         public async Task<IActionResult> Put([FromRoute] int id, [FromBody] Department department)
         {
             try
@@ -293,7 +303,7 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        //Customer does NOT have a Delete function
+        //Department does NOT have a Delete function
 
         private bool DepartmentExists(int id)
         {
