@@ -14,6 +14,7 @@ namespace TestBangazonAPI
 {
     public class TestPaymentType
     {
+        //This method test the get all payment function by ensuring paymenttypes are greated than 0
         [Fact]
         public async Task Test_Get_All_PaymentTypes()
         {
@@ -39,7 +40,7 @@ namespace TestBangazonAPI
                 Assert.True(paymentTypes.Count > 0);
             }
         }
-
+        //this method test get a single payment by comparing the values in the database to the values inputted in the test
         [Fact]
         public async Task Test_Get_Single_PaymentType()
         {
@@ -61,6 +62,8 @@ namespace TestBangazonAPI
                 Assert.NotNull(paymentType);
             }
         }
+
+        //this method allows to create a payment by building a new payment type and that new payment is then deleted using the new ID created
         [Fact]
         public async Task Test_Create_And_Delete_PaymentType()
         {
@@ -96,6 +99,8 @@ namespace TestBangazonAPI
                 Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
             }
         }
+
+        //this method allow s us to update an existing payment type
         [Fact]
         public async Task Test_Put_For_PaymentType()
         {
@@ -137,6 +142,16 @@ namespace TestBangazonAPI
                 Assert.Equal(newName, newNameCard.Name);
             }
         }
+        //Test to make sure a nonexistenet paymentType is not returned
+        [Fact]
+        public async Task Test_Get_NonExitant_PaymentType_Fail()
+        {
 
+            using (var client = new APIClientProvider().Client)
+            {
+                var response = await client.GetAsync("/PaymentType/123852");
+                Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            }
+        }
     }
 }
