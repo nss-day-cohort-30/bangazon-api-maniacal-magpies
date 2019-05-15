@@ -80,8 +80,12 @@ namespace BangazonAPI.Controllers
                         {
                             includeProducts = true;
                             sql_select += @", c.FirstName, c.LastName,
-                                          p.Id ProductId, p.Price, p.Title ProductTitle, p.Description ProductDescription, p.Quantity ProductQuantity, p.CustomerId SellerId
+                                          p.Id ProductId, p.Price, p.Title ProductTitle, p.Description ProductDescription, p.Quantity ProductQuantity, p.CustomerId SellerId,
                                           prodtype.Id ProductTypeId, prodtype.Name ProductTypeName";
+                            sql_join += @" JOIN Customer c ON c.Id = o.CustomerId
+                                          JOIN OrderProduct op ON op.OrderId = o.Id
+                                          JOIN Product p ON op.ProductId = p.Id
+                                          JOIN ProductType prodtype ON p.ProductTypeId = prodtype.Id";
                         }
                         //TODO: if an invalid query is used with 'include' throw an error?
 
@@ -113,7 +117,7 @@ namespace BangazonAPI.Controllers
                             paymentTypeId = reader.GetInt32(reader.GetOrdinal("PaymentTypeId"));
                             payment = new PaymentType
                             {
-                                Id = reader.GetInt32(reader.GetOrdinal("PaymentId")),
+                                Id = (int)paymentTypeId,
                                 AcctNumber = reader.GetInt32(reader.GetOrdinal("PaymentAccount")),
                                 Name = reader.GetString(reader.GetOrdinal("PaymentName")),
                                 CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
@@ -158,7 +162,15 @@ namespace BangazonAPI.Controllers
                         {
                             ordersHash[orderId].Products.Add(new Product
                             {
-
+                                Id = reader.GetInt32(reader.GetOrdinal("ProductId")),
+                                ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
+                                ProductType = reader.GetString(reader.GetOrdinal("ProductTypeName")),
+                                CustomerId = reader.GetInt32(reader.GetOrdinal("SellerId")),
+                                Customer = null,
+                                Price = reader.GetDecimal(reader.GetOrdinal("Price")),
+                                Title = reader.GetString(reader.GetOrdinal("ProductTitle")),
+                                Description = reader.GetString(reader.GetOrdinal("ProductDescription")),
+                                Quantity = reader.GetInt32(reader.GetOrdinal("ProductQuantity")),
                             });
                         }
 
