@@ -170,7 +170,7 @@ namespace TestBangazonAPI
                 */
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 Assert.True(departments.Count > 0);
-                
+                                
             }
         }
 
