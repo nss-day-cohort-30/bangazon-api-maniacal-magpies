@@ -135,5 +135,44 @@ namespace TestBangazonAPI
             }
         }
 
+        //Test to make sure a nonexistenet department is not returned
+        [Fact]
+        public async Task Test_Get_NonExitant_Department_Fail()
+        {
+
+            using (var client = new APIClientProvider().Client)
+            {
+                var response = await client.GetAsync("/Department/123852");
+                Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            }
+        }
+        //This method test the get all department function with get employes in department 
+        [Fact]
+        public async Task Test_Get_All_Departments_And_Employees()
+        {
+            using (var client = new APIClientProvider().Client)
+            {
+                /*
+                    ARRANGE
+                */
+
+                /*
+                    ACT
+                */
+                var response = await client.GetAsync("/Department?_include=employees");
+
+
+                string responseBody = await response.Content.ReadAsStringAsync();
+                var departments = JsonConvert.DeserializeObject<List<Department>>(responseBody);
+
+                /*
+                    ASSERT
+                */
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.True(departments.Count > 0);
+                
+            }
+        }
+
     }
 }

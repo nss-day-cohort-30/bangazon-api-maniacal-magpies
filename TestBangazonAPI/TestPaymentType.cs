@@ -142,6 +142,16 @@ namespace TestBangazonAPI
                 Assert.Equal(newName, newNameCard.Name);
             }
         }
+        //Test to make sure a nonexistenet paymentType is not returned
+        [Fact]
+        public async Task Test_Get_NonExitant_PaymentType_Fail()
+        {
 
+            using (var client = new APIClientProvider().Client)
+            {
+                var response = await client.GetAsync("/PaymentType/123852");
+                Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            }
+        }
     }
 }
