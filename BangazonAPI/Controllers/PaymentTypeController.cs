@@ -11,6 +11,17 @@ using Microsoft.AspNetCore.Http;
 
 namespace BangazonAPI.Controllers
 {
+    /// <summary>
+    /// PaymentTypeController: A class allow developers to access the PaymentType resource of the BangazonAPI database.
+    /// Author: Antonio Jefferson
+    /// Methods: 
+    ///     Get -- used to get a List of all PaymentTypes in the database
+    ///     GetPaymentType -- used to get a single PaymentType from the database
+    ///     Post -- used to add a single PaymentType to the database
+    ///     Put -- used to update a single PaymentType in the database
+    ///     Delete -- used to remove a single PaymentType from the database
+    ///     PaymentTypeExists -- used for verification
+    /// </summary>
     [Route("[controller]")]
     [ApiController]
     public class PaymentTypeController : ControllerBase

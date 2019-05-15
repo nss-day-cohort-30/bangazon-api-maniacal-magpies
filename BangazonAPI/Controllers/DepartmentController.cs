@@ -11,6 +11,16 @@ using Microsoft.Extensions.Configuration;
 
 namespace BangazonAPI.Controllers
 {
+    /// <summary>
+    /// DepartmentController: A class allow developers to access the Department resource of the BangazonAPI database.
+    /// Author: Antonio Jefferson
+    /// Methods: 
+    ///     Get -- used to get a List of all Departments in the database
+    ///     GetDepartment -- used to get a single Department from the database
+    ///     Post -- used to add a single Department to the database
+    ///     Put -- used to update a single Department in the database
+    ///     DepartmentExists -- used for verification
+    /// </summary>
     [Route("[controller]")]
     [ApiController]
     public class DepartmentController : ControllerBase

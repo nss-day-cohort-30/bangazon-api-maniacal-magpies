@@ -1,11 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace BangazonAPI.Models
 {
+    /// <summary>
+    /// Product: A class describing an Employee
+    /// Author: Antonio Jefferson
+    /// </summary>
     public class Employee
     {
         public int Id { get; set; }

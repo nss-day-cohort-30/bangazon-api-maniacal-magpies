@@ -3,6 +3,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace BangazonAPI.Models
 {
+    /// <summary>
+    /// Product: A class describing a Customer
+    /// Author: Antonio Jefferson
+    /// </summary>
     public class Customer
     {
         public int Id { get; set; }

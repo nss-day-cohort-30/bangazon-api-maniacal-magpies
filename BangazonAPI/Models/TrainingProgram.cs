@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 
 namespace BangazonAPI.Models
 {
+    /// <summary>
+    /// TrainingProgram: A class describing a Training Program at Bangazon
+    /// Author: Antonio Jefferson
+    /// </summary>
     public class TrainingProgram
     {
         public int Id { get; set; }  
@@ -23,7 +25,6 @@ namespace BangazonAPI.Models
         public int MaxAttendees { get; set; }
 
         public List<Employee> Employees { get; set; }
-
 
     }
 }

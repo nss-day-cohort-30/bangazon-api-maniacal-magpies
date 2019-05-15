@@ -11,6 +11,17 @@ using Microsoft.Extensions.Configuration;
 
 namespace BangazonAPI.Controllers
 {
+    /// <summary>
+    /// PRoductTypeController: A class allow developers to access the PRoductType resource of the BangazonAPI database.
+    /// Author: Brian Neal
+    /// Methods: 
+    ///     Get -- used to get a List of all PRoductTypes in the database
+    ///     GetPRoductType -- used to get a single PRoductType from the database
+    ///     Post -- used to add a single PRoductType to the database
+    ///     Put -- used to update a single PRoductType in the database
+    ///     Delete -- used to remove a single PaymentType from the database
+    ///     PRoductTypeExists -- used for verification
+    /// </summary>
     [Route("[controller]")]
     [ApiController]
     public class ProductTypeController : ControllerBase

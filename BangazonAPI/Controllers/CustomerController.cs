@@ -71,7 +71,7 @@ namespace BangazonAPI.Controllers
                 sql = $"{sql_head} {sql_end} {sql_q_end}";
             }
 
-            if (active == "false")
+            if (active == "false") //?active=false
             {
                 string sql_inactive_end = @"LEFT JOIN [Order] o ON c.Id = o.CustomerId
                             WHERE o.CustomerId IS NULL";
