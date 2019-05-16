@@ -173,6 +173,26 @@ namespace TestBangazonAPI
 
                 Assert.Equal(HttpStatusCode.OK, getLeonard.StatusCode);
                 Assert.Equal(newLastName, newLeonard.LastName);
+
+                ///////////////
+                /*
+                    Reset data
+                 */
+                Employee resetLeonard = new Employee
+                {
+                    FirstName = "Leonard",
+                    LastName = "Snart",
+                    DepartmentId = 1
+                };
+                var resetLeonardAsJSON = JsonConvert.SerializeObject(resetLeonard);
+
+                var resetResponse = await client.PutAsync(
+                    "/employee/1",
+                    new StringContent(resetLeonardAsJSON, Encoding.UTF8, "application/json")
+                );
+
+
+
             }
         }
     }
