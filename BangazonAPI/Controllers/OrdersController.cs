@@ -37,7 +37,7 @@ namespace BangazonAPI.Controllers
                 ?completed=false will return open orders
         */
 
-        //GET /values
+        //GET /orders
         [HttpGet]
         public async Task<IActionResult> Get(bool? completed, string _include)
         {
@@ -46,9 +46,9 @@ namespace BangazonAPI.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    //=================================
-                    //| GET QUERIES AND SQL STATEMENT |
-                    //=================================
+                    //=============================
+                    //| QUERIES AND SQL STATEMENT |
+                    //=============================
 
                     //default SQL statement
                     string sql_select = @"SELECT o.Id, o.CustomerId BuyerId, o.PaymentTypeId,
@@ -59,12 +59,16 @@ namespace BangazonAPI.Controllers
                                         ";
 
                     string sql_join = @" FROM [Order] o LEFT JOIN PaymentType pt ON pt.Id = o.PaymentTypeId
-                                         JOIN OrderProduct op ON op.OrderId = o.Id
-                                         JOIN Product p ON op.ProductId = p.Id
-                                         JOIN ProductType prodtype ON p.ProductTypeId = prodtype.Id
-                                         JOIN Customer seller ON seller.Id = p.CustomerId";
-                    string sql_end = @" WHERE 1=1";
+                                         LEFT JOIN OrderProduct op ON op.OrderId = o.Id
+                                         LEFT JOIN Product p ON op.ProductId = p.Id
+                                         LEFT JOIN ProductType prodtype ON p.ProductTypeId = prodtype.Id
+                                         LEFT JOIN Customer seller ON seller.Id = p.CustomerId";
+                    string sql_end = @" WHERE 1=1
+                                        ";
 
+                    //==================
+                    //|  ?completed=   |
+                    //==================
                     //'completed' query will include completed(true) or non-completed(false) orders
                     if (completed != null)
                     {
@@ -78,6 +82,10 @@ namespace BangazonAPI.Controllers
                         }
                     }
 
+
+                    //==================
+                    //|   ?_include=   |
+                    //==================
                     //'_include' query can equal 'customers' to return relevant information with the order
                     bool includeCustomers = false;
 
@@ -89,6 +97,7 @@ namespace BangazonAPI.Controllers
                     }
                     //TODO: if an invalid query is used with 'include' throw an error?
 
+
                     //construct the final SQL statement based on queries used
                     string sql = sql_select + sql_join + sql_end;
 
@@ -97,7 +106,7 @@ namespace BangazonAPI.Controllers
 
                     Dictionary<int, Order> ordersHash = new Dictionary<int, Order>();
 
-                    //iterate through all rows of data, adding each order to the dictionary once and each individual product to the relevant order
+                    //read through all rows of data, adding each order to the dictionary once and each individual product to the relevant order
                     while (reader.Read())
                     {
                         int orderId = reader.GetInt32(reader.GetOrdinal("Id"));
@@ -148,26 +157,29 @@ namespace BangazonAPI.Controllers
                             };
                         }
 
-                        //instantiate and add product to order
-                        ordersHash[orderId].Products.Add(new Product
+                        //make sure there's a product then instantiate and add product from current row to order
+                        if (!reader.IsDBNull(reader.GetOrdinal("ProductId")))
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("ProductId")),
-                            ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
-                            ProductType = reader.GetString(reader.GetOrdinal("ProductTypeName")),
-                            CustomerId = reader.GetInt32(reader.GetOrdinal("SellerId")),
-                            Customer = new Customer
+                            ordersHash[orderId].Products.Add(new Product
                             {
-                                Id = reader.GetInt32(reader.GetOrdinal("SellerId")),
-                                FirstName = reader.GetString(reader.GetOrdinal("SellerFirstName")),
-                                LastName = reader.GetString(reader.GetOrdinal("SellerLastName")),
-                                ProductsSelling = null,
-                                PaymentTypesUsed = null
-                            },
-                            Price = reader.GetDecimal(reader.GetOrdinal("Price")),
-                            Title = reader.GetString(reader.GetOrdinal("ProductTitle")),
-                            Description = reader.GetString(reader.GetOrdinal("ProductDescription")),
-                            Quantity = reader.GetInt32(reader.GetOrdinal("ProductQuantity")),
-                        });
+                                Id = reader.GetInt32(reader.GetOrdinal("ProductId")),
+                                ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
+                                ProductType = reader.GetString(reader.GetOrdinal("ProductTypeName")),
+                                CustomerId = reader.GetInt32(reader.GetOrdinal("SellerId")),
+                                Customer = new Customer
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("SellerId")),
+                                    FirstName = reader.GetString(reader.GetOrdinal("SellerFirstName")),
+                                    LastName = reader.GetString(reader.GetOrdinal("SellerLastName")),
+                                    ProductsSelling = null,
+                                    PaymentTypesUsed = null
+                                },
+                                Price = reader.GetDecimal(reader.GetOrdinal("Price")),
+                                Title = reader.GetString(reader.GetOrdinal("ProductTitle")),
+                                Description = reader.GetString(reader.GetOrdinal("ProductDescription")),
+                                Quantity = reader.GetInt32(reader.GetOrdinal("ProductQuantity")),
+                            });
+                        }
 
                     }
 
@@ -186,7 +198,7 @@ namespace BangazonAPI.Controllers
                 ?_include=customers will return buyer information on the order
         */
 
-        // GET /values/5
+        // GET /orders/5
         [HttpGet("{id}", Name = "GetOrder")]
         public async Task<IActionResult> Get(int id, string _include)
         {
@@ -200,9 +212,9 @@ namespace BangazonAPI.Controllers
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
 
-                    //=================================
-                    //| GET QUERIES AND SQL STATEMENT |
-                    //=================================
+                    //=============================
+                    //| QUERIES AND SQL STATEMENT |
+                    //=============================
 
                     //default SQL statement
                     string sql_select = @"SELECT o.Id, o.CustomerId BuyerId, o.PaymentTypeId,
@@ -213,12 +225,16 @@ namespace BangazonAPI.Controllers
                                         ";
 
                     string sql_join = @" FROM [Order] o LEFT JOIN PaymentType pt ON pt.Id = o.PaymentTypeId
-                                         JOIN OrderProduct op ON op.OrderId = o.Id
-                                         JOIN Product p ON op.ProductId = p.Id
-                                         JOIN ProductType prodtype ON p.ProductTypeId = prodtype.Id
-                                         JOIN Customer seller ON seller.Id = p.CustomerId";
+                                         LEFT JOIN OrderProduct op ON op.OrderId = o.Id
+                                         LEFT JOIN Product p ON op.ProductId = p.Id
+                                         LEFT JOIN ProductType prodtype ON p.ProductTypeId = prodtype.Id
+                                         LEFT JOIN Customer seller ON seller.Id = p.CustomerId";
                     string sql_end = @" WHERE o.Id = @id";
 
+
+                    //==================
+                    //|   ?_include=   |
+                    //==================
                     //'_include' query can equal 'customers' to return relevant information with the order
                     bool includeCustomers = false;
 
@@ -244,7 +260,7 @@ namespace BangazonAPI.Controllers
                     Order order = null;
                     Dictionary<int, Order> orderHash = new Dictionary<int, Order>();
 
-
+                    //read through all rows of data, adding each order to the dictionary once and each individual product to the relevant order
                     while (reader.Read())
                     {
 
@@ -296,26 +312,29 @@ namespace BangazonAPI.Controllers
                             };
                         }
 
-                        //instantiate and add product to order
-                        orderHash[orderId].Products.Add(new Product
+                        //make sure there's a product then instantiate and add product from current row to order
+                        if (!reader.IsDBNull(reader.GetOrdinal("ProductId")))
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("ProductId")),
-                            ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
-                            ProductType = reader.GetString(reader.GetOrdinal("ProductTypeName")),
-                            CustomerId = reader.GetInt32(reader.GetOrdinal("SellerId")),
-                            Customer = new Customer
+                            orderHash[orderId].Products.Add(new Product
                             {
-                                Id = reader.GetInt32(reader.GetOrdinal("SellerId")),
-                                FirstName = reader.GetString(reader.GetOrdinal("SellerFirstName")),
-                                LastName = reader.GetString(reader.GetOrdinal("SellerLastName")),
-                                ProductsSelling = null,
-                                PaymentTypesUsed = null
-                            },
-                            Price = reader.GetDecimal(reader.GetOrdinal("Price")),
-                            Title = reader.GetString(reader.GetOrdinal("ProductTitle")),
-                            Description = reader.GetString(reader.GetOrdinal("ProductDescription")),
-                            Quantity = reader.GetInt32(reader.GetOrdinal("ProductQuantity")),
-                        });
+                                Id = reader.GetInt32(reader.GetOrdinal("ProductId")),
+                                ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
+                                ProductType = reader.GetString(reader.GetOrdinal("ProductTypeName")),
+                                CustomerId = reader.GetInt32(reader.GetOrdinal("SellerId")),
+                                Customer = new Customer
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("SellerId")),
+                                    FirstName = reader.GetString(reader.GetOrdinal("SellerFirstName")),
+                                    LastName = reader.GetString(reader.GetOrdinal("SellerLastName")),
+                                    ProductsSelling = null,
+                                    PaymentTypesUsed = null
+                                },
+                                Price = reader.GetDecimal(reader.GetOrdinal("Price")),
+                                Title = reader.GetString(reader.GetOrdinal("ProductTitle")),
+                                Description = reader.GetString(reader.GetOrdinal("ProductDescription")),
+                                Quantity = reader.GetInt32(reader.GetOrdinal("ProductQuantity")),
+                            });
+                        }
 
                         order = orderHash[orderId];
                     }
@@ -327,121 +346,117 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        // POST /values
+
+        /* 
+            Method to post a new order.
+        */
+        // POST /orders
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] Product product)
+        public async Task<IActionResult> Post([FromBody] Order order)
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    // More string interpolation
-                    cmd.CommandText = @"
-                        INSERT INTO Product (ProductTypeId, CustomerId, Price, Title, Description, Quantity)
+                    cmd.CommandText = @"INSERT INTO [Order] (CustomerId, PaymentTypeId)
                         OUTPUT INSERTED.Id
-                        VALUES (@ProductTypeId, @CustomerId, @Price, @Title, @Description, @Quantity)
+                        VALUES (@CustomerId, @PaymentTypeId)
                     ";
-                    cmd.Parameters.Add(new SqlParameter("@ProductTypeId", product.ProductTypeId));
-                    cmd.Parameters.Add(new SqlParameter("@CustomerId", product.CustomerId));
-                    cmd.Parameters.Add(new SqlParameter("@Price", product.Price));
-                    cmd.Parameters.Add(new SqlParameter("@Title", product.Title));
-                    cmd.Parameters.Add(new SqlParameter("@Description", product.Description));
-                    cmd.Parameters.Add(new SqlParameter("@Quantity", product.Quantity));
+                    cmd.Parameters.Add(new SqlParameter("@CustomerId", order.CustomerId));
+                    cmd.Parameters.Add(new SqlParameter("@PaymentTypeId", order.PaymentTypeId));
 
-                    product.Id = (int)await cmd.ExecuteScalarAsync();
+                    order.Id = (int)await cmd.ExecuteScalarAsync();
 
-                    return CreatedAtRoute("GetProduct", new { id = product.Id }, product);
+                    return CreatedAtRoute("GetProduct", new { id = order.Id }, order);
                 }
             }
         }
 
-        //// PUT /values/5
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> Put(int id, [FromBody] Product product)
-        //{
-        //    try
-        //    {
-        //        if (!OrderExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        using (SqlConnection conn = Connection)
-        //        {
-        //            conn.Open();
-        //            using (SqlCommand cmd = conn.CreateCommand())
-        //            {
-        //                cmd.CommandText = @"
-        //                    UPDATE Product
-        //                    SET ProductTypeId = @ProductTypeId,
-        //                    CustomerId = @CustomerId,
-        //                    Price = @Price,
-        //                    Title = @Title,
-        //                    Description = @Description,
-        //                    Quantity = @Quantity
-        //                    WHERE Id = @id
-        //                ";
-        //                cmd.Parameters.Add(new SqlParameter("@id", product.Id));
-        //                cmd.Parameters.Add(new SqlParameter("@ProductTypeId", product.ProductTypeId));
-        //                cmd.Parameters.Add(new SqlParameter("@CustomerId", product.CustomerId));
-        //                cmd.Parameters.Add(new SqlParameter("@Price", product.Price));
-        //                cmd.Parameters.Add(new SqlParameter("@Title", product.Title));
-        //                cmd.Parameters.Add(new SqlParameter("@Description", product.Description));
-        //                cmd.Parameters.Add(new SqlParameter("@Quantity", product.Quantity));
 
-        //                int rowsAffected = await cmd.ExecuteNonQueryAsync();
+        /*
+            Method to update an existing order 
+        */
+        // PUT /orders/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Put(int id, [FromBody] Order order)
+        {
+            try
+            {
+                if (!OrderExists(id))
+                {
+                    return NotFound();
+                }
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = $@"UPDATE [Order]
+                            SET CustomerId = @CustomerId,
+                            PaymentTypeId = @PaymentTypeId
+                            WHERE Id = @id
+                        ";
+                        cmd.Parameters.Add(new SqlParameter("@id", order.Id));
+                        cmd.Parameters.Add(new SqlParameter("@CustomerId", order.CustomerId));
+                        cmd.Parameters.Add(new SqlParameter("@PaymentTypeId", order.PaymentTypeId != null ? (object)order.PaymentTypeId : DBNull.Value));
 
-        //                if (rowsAffected > 0)
-        //                {
-        //                    return new StatusCodeResult(StatusCodes.Status204NoContent);
-        //                }
+                        int rowsAffected = await cmd.ExecuteNonQueryAsync();
 
-        //                throw new Exception("No rows affected");
-        //            }
-        //        }
-        //    }
-        //    catch (Exception)
-        //    {
-        //        if (!OrderExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
-        //}
+                        if (rowsAffected > 0)
+                        {
+                            return new StatusCodeResult(StatusCodes.Status204NoContent);
+                        }
 
-        ////DELETE api/values/5
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> Delete(int id)
-        //{
-        //    if (!OrderExists(id))
-        //    {
-        //        return NotFound();
-        //    }
-        //    using (SqlConnection conn = Connection)
-        //    {
-        //        conn.Open();
-        //        using (SqlCommand cmd = conn.CreateCommand())
-        //        {
-        //            cmd.CommandText = @"
-        //                DELETE FROM Product WHERE Id = @id
-        //            ";
-        //            cmd.Parameters.Add(new SqlParameter("@id", id));
+                        throw new Exception("No rows affected");
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                if (!OrderExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+        }
 
-        //            int rowsAffected = await cmd.ExecuteNonQueryAsync();
+        /*
+            Method to delete a single order, along with any OrderProducts associated with it
+        */
+        //DELETE api/values/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            if (!OrderExists(id))
+            {
+                return NotFound();
+            }
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                        DELETE FROM [Order] WHERE Id = @id
+                    ";
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
 
-        //            if (rowsAffected > 0)
-        //            {
-        //                return new StatusCodeResult(StatusCodes.Status204NoContent);
-        //            }
+                    int rowsAffected = await cmd.ExecuteNonQueryAsync();
 
-        //            throw new Exception("No rows affected");
-        //        }
-        //    }
-        //}
+                    if (rowsAffected > 0)
+                    {
+                        return new StatusCodeResult(StatusCodes.Status204NoContent);
+                    }
+
+                    throw new Exception("No rows affected");
+                }
+            }
+        }
 
         private bool OrderExists(int id)
         {
