@@ -10,6 +10,17 @@ using Microsoft.Extensions.Configuration;
 
 namespace BangazonAPI.Controllers
 {
+    /// <summary>
+    /// OrdersController: A class allow developers to access the Order resource of the BangazonAPI database.
+    /// Author: Brian Neal
+    /// Methods: 
+    ///     Get -- used to get a List of all Orders in the database
+    ///     GetOrder -- used to get a single Order from the database
+    ///     Post -- used to add a single Order to the database
+    ///     Put -- used to update a single Order in the database
+    ///     Delete -- used to remove a single Order from the database
+    ///     OrderExists -- used for verification
+    /// </summary>
     [Route("[controller]")]  //  /orders
     [ApiController]
     public class OrdersController : ControllerBase

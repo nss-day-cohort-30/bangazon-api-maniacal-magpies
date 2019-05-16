@@ -9,6 +9,17 @@ using Microsoft.Extensions.Configuration;
 
 namespace BangazonAPI.Controllers
 {
+    /// <summary>
+    /// ComputerController: A class allow developers to access the Computer resource of the BangazonAPI database.
+    /// Author: Panya Farnette
+    /// Methods: 
+    ///     Get -- used to get a List of all Computers in the database
+    ///     GetComputer -- used to get a single Computer from the database
+    ///     Post -- used to add a single Computer to the database
+    ///     Put -- used to update a single Computer in the database
+    ///     Delete -- used to remove a single Computer from the database
+    ///     ComputerExists -- used for verification
+    /// </summary>
     [Route("[controller]")]
     [ApiController]
     public class ComputerController : ControllerBase
@@ -29,6 +40,7 @@ namespace BangazonAPI.Controllers
         }
 
         [HttpGet]
+        //this function gets a List of all Computers in the database
         public async Task<IActionResult> Get()
         {
             using (SqlConnection conn = Connection)
@@ -62,6 +74,7 @@ namespace BangazonAPI.Controllers
         }
 
         [HttpGet("{id}", Name = "GetComputer")]
+        //this function gets a single Computer from the database, by id
         public async Task<IActionResult> Get([FromRoute] int id)
         {
             using (SqlConnection conn = Connection)
@@ -105,7 +118,9 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        [HttpPost] 
+        [HttpPost]
+        //this function adds a single Computer to the database
+        //it takes a single parameter of type Computer to be parsed for input
         public async Task<IActionResult> Post([FromBody] Computer computer)
         {
             using (SqlConnection conn = Connection)
@@ -128,6 +143,9 @@ namespace BangazonAPI.Controllers
         }
 
         [HttpPut("{id}")]
+        //this function updates a single Computer in the database
+        //the id parameter indicates which database record should be updated
+        //the Computer type parameter contains the data to be updated into the indicated database record
         public async Task<IActionResult> Put([FromRoute] int id, [FromBody] Computer computer)
         {
             try
@@ -167,6 +185,7 @@ namespace BangazonAPI.Controllers
         }
 
         [HttpDelete("{id}")]
+        //this function deletes a single Computer from the database using the id
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
             try
@@ -200,7 +219,8 @@ namespace BangazonAPI.Controllers
                 }
             }
         }
-
+        //this function checks the database for the existence of a record matching the id parameter, and returns true or false
+        //the id parameter indicates which database record should be pulled
         private bool ComputerExists(int id)
         {
             using (SqlConnection conn = Connection)

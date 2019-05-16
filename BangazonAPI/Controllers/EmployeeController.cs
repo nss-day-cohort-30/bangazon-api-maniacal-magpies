@@ -11,6 +11,16 @@ using Microsoft.Extensions.Configuration;
 
 namespace BangazonAPI.Controllers
 {
+    /// <summary>
+    /// EmployeeController: A class allow developers to access the Employee resource of the BangazonAPI database.
+    /// Author: Panya Farnette
+    /// Methods: 
+    ///     Get -- used to get a List of all Employees in the database
+    ///     GetEmployee -- used to get a single Employee from the database
+    ///     Post -- used to add a single Employee to the database
+    ///     Put -- used to update a single Employee in the database
+    ///     EmployeeExists -- used for verification
+    /// </summary>
     [Route("[controller]")]
     [ApiController]
     public class EmployeeController : ControllerBase
@@ -39,7 +49,7 @@ namespace BangazonAPI.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-
+                    //the SQL syntax, including data for Employee's Department and assigned Computer if they have one
                     cmd.CommandText = $@"SELECT e.Id AS EmployeeId, e.FirstName, e.LastName, 
                                 e.DepartmentId, d.Name AS DepartmentName, 
                                 c.Id AS ComputerId, c.Make, c.Manufacturer FROM Employee e
@@ -63,6 +73,7 @@ namespace BangazonAPI.Controllers
                                 Name = reader.GetString(reader.GetOrdinal("DepartmentName"))
                             }
                         };
+                        //check if the Employee has a Computer assigned to them -- if not, leave employee.Computer as null
                         if (!reader.IsDBNull(reader.GetOrdinal("ComputerId")))
                         {
                             Computer computer = new Computer
@@ -84,6 +95,7 @@ namespace BangazonAPI.Controllers
 
         [HttpGet("{id}", Name = "GetEmployee")]
         //this function gets a single Employee from the database, by id
+     
         public async Task<IActionResult> Get([FromRoute] int id)
         {
             try
@@ -93,6 +105,7 @@ namespace BangazonAPI.Controllers
                     conn.Open();
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
+                        //the SQL syntax, including data for Employee's Department and assigned Computer if they have one
                         cmd.CommandText = $@"SELECT e.Id AS EmployeeId, e.FirstName, e.LastName, 
                                 e.DepartmentId, d.Name AS DepartmentName, 
                                 c.Id AS ComputerId, c.Make, c.Manufacturer FROM Employee e
@@ -121,6 +134,7 @@ namespace BangazonAPI.Controllers
                                         Name = reader.GetString(reader.GetOrdinal("DepartmentName"))
                                     }
                                 };
+                                //check if the Employee has a Computer assigned to them -- if not, leave employee.Computer as null
                                 if (!reader.IsDBNull(reader.GetOrdinal("ComputerId")))
                                 {
                                     Computer computer = new Computer
@@ -162,6 +176,7 @@ namespace BangazonAPI.Controllers
 
         [HttpPost]
         //this function adds a single Employee to the database
+        //it takes a single parameter of type Employee to be parsed for input
         public async Task<IActionResult> Post([FromBody] Employee employee)
         {
             using (SqlConnection conn = Connection)
@@ -185,6 +200,8 @@ namespace BangazonAPI.Controllers
 
         [HttpPut("{id}")]
         //this function updates a single Employee in the database
+        //the id parameter indicates which database record should be updated
+        //the Employee type parameter contains the data to be updated into the indicated database record
         public async Task<IActionResult> Put([FromRoute] int id, [FromBody] Employee employee)
         {
             try
@@ -194,6 +211,7 @@ namespace BangazonAPI.Controllers
                     conn.Open();
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
+                        //remember that DepartmentId in the database CANNOT be null
                         cmd.CommandText = @"UPDATE Employee SET FirstName = @FirstName,
                                             LastName = @LastName, DepartmentId = @DepartmentId
                                             WHERE Id = @id";
@@ -225,6 +243,8 @@ namespace BangazonAPI.Controllers
         }
 
         //Employee does NOT have a Delete function
+        //this function checks the database for the existence of a record matching the id parameter, and returns true or false
+        //the id parameter indicates which database record should be pulled
 
         private bool EmployeeExists(int id)
         {

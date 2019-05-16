@@ -11,6 +11,16 @@ using Microsoft.Extensions.Configuration;
 
 namespace BangazonAPI.Controllers
 {
+    /// <summary>
+    /// CustomerController: A class allow developers to access the Customer resource of the BangazonAPI database.
+    /// Author: Panya Farnette
+    /// Methods: 
+    ///     Get -- used to get a List of all Customers in the database
+    ///     GetCustomer -- used to get a single Customer from the database
+    ///     Post -- used to add a single Customer to the database
+    ///     Put -- used to update a single Customer in the database
+    ///     CustomerExists -- used for verification
+    /// </summary>
     [Route("[controller]")]
     [ApiController]
     public class CustomerController : ControllerBase
@@ -32,9 +42,12 @@ namespace BangazonAPI.Controllers
 
         [HttpGet]
         //this function gets a List of all Customers in the database
+        //the _include parameter allows the user to select between listing products and listing payment methods used
+        //the q parameter allows the user to input a string to be searched for in the Customer database table
+        //the active parameter allows the user to gt a list of Customers who have not yet placed an order
         public async Task<IActionResult> Get(string _include, string q, string active)
         {
-            //create the SQL as a string, in order to be able to add to it with the 'include' queries
+            //create the SQL as a string, in order to be able to add to it for query strings
             string sql_head = "SELECT c.Id, c.FirstName, c.LastName";
             string sql_end = "FROM Customer c";
             string sql = $"{sql_head} {sql_end}";
@@ -61,7 +74,7 @@ namespace BangazonAPI.Controllers
                 sql = $"{sql_head} {sql_end} {sql_q_end}";
             }
 
-            if (active == "false")
+            if (active == "false") //?active=false
             {
                 string sql_inactive_end = @"LEFT JOIN [Order] o ON c.Id = o.CustomerId
                             WHERE o.CustomerId IS NULL";
@@ -142,6 +155,7 @@ namespace BangazonAPI.Controllers
 
         [HttpGet("{id}", Name = "GetCustomer")]
         //this function gets a single Customer from the database, by id
+        //the _include parameter allows the user to select between listing products and listing payment methods used
         public async Task<IActionResult> Get([FromRoute] int id, string _include)
         {
             try
@@ -250,6 +264,7 @@ namespace BangazonAPI.Controllers
 
         [HttpPost]
         //this function adds a single Customer to the database
+        //it takes a single parameter of type Customer to be parsed for input
         public async Task<IActionResult> Post([FromBody] Customer customer)
         {
             using (SqlConnection conn = Connection)
@@ -272,6 +287,8 @@ namespace BangazonAPI.Controllers
 
         [HttpPut("{id}")]
         //this function updates a single Customer in the database
+        //the id parameter indicates which database record should be updated
+        //the Customer type parameter contains the data to be updated into the indicated database record
         public async Task<IActionResult> Put([FromRoute] int id, [FromBody] Customer customer)
         {
             try
@@ -311,6 +328,8 @@ namespace BangazonAPI.Controllers
 
         //Customer does NOT have a Delete function
 
+        //this function checks the database for the existence of a record matching the id parameter, and returns true or false
+        //the id parameter indicates which database record should be pulled
         private bool CustomerExists(int id)
         {
             using (SqlConnection conn = Connection)

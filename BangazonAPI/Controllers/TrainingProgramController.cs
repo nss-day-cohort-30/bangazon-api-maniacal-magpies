@@ -11,6 +11,17 @@ using Microsoft.Extensions.Configuration;
 
 namespace BangazonAPI.Controllers
 {
+    /// <summary>
+    /// TrainingProgramController: A class allow developers to access the TrainingProgram resource of the BangazonAPI database.
+    /// Author: Emmett Schneider
+    /// Methods: 
+    ///     Get -- used to get a List of all TrainingPrograms in the database
+    ///     GetTrainingProgram -- used to get a single TrainingProgram from the database
+    ///     Post -- used to add a single TrainingProgram to the database
+    ///     Put -- used to update a single TrainingProgram in the database
+    ///     Delete -- used to remove a single TrainingProgram from the database
+    ///     TrainingProgramExists -- used for verification
+    /// </summary>
     [Route("[controller]")]
     [ApiController]
     public class TrainingProgramController : ControllerBase

@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace BangazonAPI.Models
 {
-    //Model to represent a single Order
+    /// <summary>
+    /// Product: A class describing an Order
+    /// Author: Antonio Jefferson
+    /// </summary>
     public class Order
     {
         public int Id { get; set; }

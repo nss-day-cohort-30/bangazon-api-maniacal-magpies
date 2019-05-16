@@ -83,7 +83,7 @@ INSERT INTO ComputerEmployee (EmployeeId, ComputerId, AssignDate)
 	SELECT e.Id , c.Id, GETDATE() FROM Employee e, Computer c
 	WHERE e.FirstName = 'Iris' AND c.Make = 'Inspiron';
 
-	INSERT INTO TrainingProgram ([Name], StartDate, EndDate, MaxAttendees)
+INSERT INTO TrainingProgram ([Name], StartDate, EndDate, MaxAttendees)
 VALUES ('Cyber Awareness', '05-20-2019', '05-21-2019', '20');
 INSERT INTO TrainingProgram ([Name], StartDate, EndDate, MaxAttendees)
 VALUES ('Windows for Mac Users', '06-01-2019', '07-03-2019', '10');
@@ -105,4 +105,8 @@ VALUES (2, 2);
 INSERT INTO EmployeeTraining (EmployeeId, TrainingProgramId)
 VALUES (3, 1);
 INSERT INTO EmployeeTraining (EmployeeId, TrainingProgramId)
+<<<<<<< HEAD
+VALUES (3, 1);
+=======
 VALUES (3, 1); 
+>>>>>>> master
