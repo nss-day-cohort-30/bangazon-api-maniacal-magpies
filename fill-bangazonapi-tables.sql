@@ -82,3 +82,27 @@ INSERT INTO ComputerEmployee (EmployeeId, ComputerId, AssignDate)
 INSERT INTO ComputerEmployee (EmployeeId, ComputerId, AssignDate)
 	SELECT e.Id , c.Id, GETDATE() FROM Employee e, Computer c
 	WHERE e.FirstName = 'Iris' AND c.Make = 'Inspiron';
+
+	INSERT INTO TrainingProgram ([Name], StartDate, EndDate, MaxAttendees)
+VALUES ('Cyber Awareness', '05-20-2019', '05-21-2019', '20');
+INSERT INTO TrainingProgram ([Name], StartDate, EndDate, MaxAttendees)
+VALUES ('Windows for Mac Users', '06-01-2019', '07-03-2019', '10');
+INSERT INTO TrainingProgram ([Name], StartDate, EndDate, MaxAttendees)
+VALUES ('Personal Hygiene for Programmers', '08-10-2019', '08-12-2019', '15');
+INSERT INTO TrainingProgram ([Name], StartDate, EndDate, MaxAttendees)
+VALUES ('Equity: As good as money!', '02-25-2019', '02-27-2019', '10');
+
+INSERT INTO EmployeeTraining (EmployeeId, TrainingProgramId)
+VALUES (1, 1);
+INSERT INTO EmployeeTraining (EmployeeId, TrainingProgramId)
+VALUES (1, 2);
+INSERT INTO EmployeeTraining (EmployeeId, TrainingProgramId)
+VALUES (1, 3);
+INSERT INTO EmployeeTraining (EmployeeId, TrainingProgramId)
+VALUES (2, 1);
+INSERT INTO EmployeeTraining (EmployeeId, TrainingProgramId)
+VALUES (2, 2);
+INSERT INTO EmployeeTraining (EmployeeId, TrainingProgramId)
+VALUES (3, 1);
+INSERT INTO EmployeeTraining (EmployeeId, TrainingProgramId)
+VALUES (3, 1); 
