@@ -39,3 +39,16 @@ Now it's time to build the controllers that handle GET, POST, PUT, and DELETE op
 ## Test Classes
 
 Each feature ticket your team will work on for this sprint has testing requirements. This boilerplate solution has a testing project includes with some starter code. You must make sure that all tests pass before you submit a PR.
+
+## Directions For Use
+
+1. Make sure the nuGet packages **System.Data.SqlClient**, **xunit**, and **xunit.runner.visualstudio** are installed in Microsoft Visual Studio
+1. Download the code and open in Visual Studio
+1. Run the code (Debug menu > Start without Debugging)
+1. Congratulations, the Bangazon API server is now running!
+
+Ensure your database is properly created using the [Official Bangazon SQL](./create-bangazonapi-tables.sql) and fill with desired data. This can be accomplished using either a SQL database program such as Azure Data Studio, or an API front-end program such as Postman.
+
+In order to enable built-in integrated tests, please use the following SQL code: [Official Bangazon Testing Data](./fill-bangazon-tables.sql) in Azure Data Studio.
+
+If any tests fail, re-run CREATE, then FILL, then run that test by itself. If it fails again, please report the results as a bug.
