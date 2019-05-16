@@ -107,70 +107,58 @@ namespace BangazonAPI.Controllers
         [HttpGet("{id}", Name = "GetTrainingProgram")]
         public async Task<IActionResult> Get([FromRoute]int id)
         {
-            try
+            if ((!TrainingProgramExists(id)))
             {
-                // SQL string for single Training Program query
-                string sql_head = "SELECT tp.Id, tp.[Name], tp.StartDate, tp.EndDate, tp.MaxAttendees, e.FirstName, e.LastName, e.DepartmentId, e.IsSuperVisor";
-                string sql_end = @"FROM TrainingProgram tp
+                return NotFound();
+            }
+            // SQL string for single Training Program query
+            string sql_head = "SELECT tp.Id, tp.[Name], tp.StartDate, tp.EndDate, tp.MaxAttendees, e.FirstName, e.LastName, e.DepartmentId, e.IsSuperVisor";
+            string sql_end = @"FROM TrainingProgram tp
                                LEFT JOIN EmployeeTraining et ON et.TrainingProgramId = tp.Id
                                LEFT JOIN Employee e ON et.EmployeeId = e.Id";
-                string sql_where = "WHERE tp.Id = @id";
-                string sql = $"{sql_head} {sql_end} {sql_where}";
+            string sql_where = "WHERE tp.Id = @id";
+            string sql = $"{sql_head} {sql_end} {sql_where}";
 
-                using (SqlConnection conn = Connection)
-                {
-                    conn.Open();
-                    using (SqlCommand cmd = conn.CreateCommand())
-                    {
-                        cmd.CommandText = sql;
-                        cmd.Parameters.Add(new SqlParameter("@id", id));
-                        SqlDataReader reader = await cmd.ExecuteReaderAsync();
-
-                        TrainingProgram trainingProgram = null;
-
-                        while (reader.Read())
-                        {
-                            trainingProgram = new TrainingProgram
-                            {
-                                Id = reader.GetInt32(reader.GetOrdinal("id")),
-                                Name = reader.GetString(reader.GetOrdinal("name")),
-                                StartDate = reader.GetDateTime(reader.GetOrdinal("startDate")),
-                                EndDate = reader.GetDateTime(reader.GetOrdinal("endDate")),
-                                MaxAttendees = reader.GetInt32(reader.GetOrdinal("maxAttendees")),
-                                Attendees = new List<Employee>()
-                            };
-                            if (!reader.IsDBNull(reader.GetOrdinal("firstName")))
-                                {
-                                trainingProgram.Attendees.Add(new Employee
-                                {
-                                    FirstName = reader.GetString(reader.GetOrdinal("firstName")),
-                                    LastName = reader.GetString(reader.GetOrdinal("lastName")),
-                                    DepartmentId = reader.GetInt32(reader.GetOrdinal("departmentId")),
-                                    IsSuperVisor = reader.GetBoolean(reader.GetOrdinal("isSuperVisor"))
-                                });
-                            }
-                        }
-
-                        reader.Close();
-
-                        return Ok(trainingProgram);
-                    }
-                }
-            }
-
-            catch (Exception)
+            using (SqlConnection conn = Connection)
             {
-                if (!TrainingProgramExists(id))
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
+                    cmd.CommandText = sql;
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+                    SqlDataReader reader = await cmd.ExecuteReaderAsync();
+
+                    TrainingProgram trainingProgram = null;
+
+                    while (reader.Read())
+                    {
+                        trainingProgram = new TrainingProgram
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("id")),
+                            Name = reader.GetString(reader.GetOrdinal("name")),
+                            StartDate = reader.GetDateTime(reader.GetOrdinal("startDate")),
+                            EndDate = reader.GetDateTime(reader.GetOrdinal("endDate")),
+                            MaxAttendees = reader.GetInt32(reader.GetOrdinal("maxAttendees")),
+                            Attendees = new List<Employee>()
+                        };
+                        if (!reader.IsDBNull(reader.GetOrdinal("firstName")))
+                        {
+                            trainingProgram.Attendees.Add(new Employee
+                            {
+                                FirstName = reader.GetString(reader.GetOrdinal("firstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("lastName")),
+                                DepartmentId = reader.GetInt32(reader.GetOrdinal("departmentId")),
+                                IsSuperVisor = reader.GetBoolean(reader.GetOrdinal("isSuperVisor"))
+                            });
+                        }
+                    }
+
+                    reader.Close();
+
+                    return Ok(trainingProgram);
                 }
             }
         }
-
 
 
         // POST api/values
