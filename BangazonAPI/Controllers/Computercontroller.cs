@@ -120,6 +120,7 @@ namespace BangazonAPI.Controllers
 
         [HttpPost]
         //this function adds a single Computer to the database
+        //it takes a single parameter of type Computer to be parsed for input
         public async Task<IActionResult> Post([FromBody] Computer computer)
         {
             using (SqlConnection conn = Connection)
@@ -143,6 +144,8 @@ namespace BangazonAPI.Controllers
 
         [HttpPut("{id}")]
         //this function updates a single Computer in the database
+        //the id parameter indicates which database record should be updated
+        //the Computer type parameter contains the data to be updated into the indicated database record
         public async Task<IActionResult> Put([FromRoute] int id, [FromBody] Computer computer)
         {
             try
@@ -182,7 +185,7 @@ namespace BangazonAPI.Controllers
         }
 
         [HttpDelete("{id}")]
-        //this function deletes a single Computer from the database
+        //this function deletes a single Computer from the database using the id
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
             try
@@ -216,7 +219,8 @@ namespace BangazonAPI.Controllers
                 }
             }
         }
-
+        //this function checks the database for the existence of a record matching the id parameter, and returns true or false
+        //the id parameter indicates which database record should be pulled
         private bool ComputerExists(int id)
         {
             using (SqlConnection conn = Connection)

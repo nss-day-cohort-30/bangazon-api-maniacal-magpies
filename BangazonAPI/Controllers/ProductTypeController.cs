@@ -41,7 +41,7 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        // GET api/values
+        //this function gets a List of all ProductType in the database
         [HttpGet]
         public async Task<IActionResult> Get()
         {
@@ -72,7 +72,8 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        // GET api/values/5
+        //this function gets a single ProductType from the database, by id
+        //the _include parameter allows the user to select between listing products and listing payment methods used
         [HttpGet("{id}", Name = "GetProductType")]
         public async Task<IActionResult> Get([FromRoute]int id)
         {
@@ -111,7 +112,8 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        // POST api/values
+        //this function adds a single ProductType to the database
+        //it takes a single parameter of type ProductType to be parsed for input
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] ProductType productType)
         {
@@ -135,7 +137,9 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        // PUT api/values/5
+        //this function updates a single ProductType in the database
+        //the id parameter indicates which database record should be updated
+        //the ProductType parameter contains the data to be updated into the indicated database record
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, [FromBody] ProductType productType)
         {
@@ -179,7 +183,8 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        //DELETE api/values/5
+        //this function deletes a single ProductType in the database
+        //the id parameter indicates which database record should be deletes
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -215,6 +220,8 @@ namespace BangazonAPI.Controllers
             }
         }
 
+        //this function checks the database for the existence of a record matching the id parameter, and returns true or false
+        //the id parameter indicates which database record should be pulled
         private bool ProductTypeExists(int id)
         {
             using (SqlConnection conn = Connection)

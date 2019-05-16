@@ -95,6 +95,7 @@ namespace BangazonAPI.Controllers
 
         [HttpGet("{id}", Name = "GetEmployee")]
         //this function gets a single Employee from the database, by id
+     
         public async Task<IActionResult> Get([FromRoute] int id)
         {
             try
@@ -175,6 +176,7 @@ namespace BangazonAPI.Controllers
 
         [HttpPost]
         //this function adds a single Employee to the database
+        //it takes a single parameter of type Employee to be parsed for input
         public async Task<IActionResult> Post([FromBody] Employee employee)
         {
             using (SqlConnection conn = Connection)
@@ -198,6 +200,8 @@ namespace BangazonAPI.Controllers
 
         [HttpPut("{id}")]
         //this function updates a single Employee in the database
+        //the id parameter indicates which database record should be updated
+        //the Employee type parameter contains the data to be updated into the indicated database record
         public async Task<IActionResult> Put([FromRoute] int id, [FromBody] Employee employee)
         {
             try
@@ -239,6 +243,8 @@ namespace BangazonAPI.Controllers
         }
 
         //Employee does NOT have a Delete function
+        //this function checks the database for the existence of a record matching the id parameter, and returns true or false
+        //the id parameter indicates which database record should be pulled
 
         private bool EmployeeExists(int id)
         {

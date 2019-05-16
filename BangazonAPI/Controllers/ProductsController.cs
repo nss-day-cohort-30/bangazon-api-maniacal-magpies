@@ -41,7 +41,7 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        // GET /values
+        //this function gets a List of all Customers in the database
         [HttpGet]
         public async Task<IActionResult> Get()
         {
@@ -94,7 +94,7 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        // GET /values/5
+        //this function gets a single Customer from the database, by id
         [HttpGet("{id}", Name = "GetProduct")]
         public async Task<IActionResult> Get(int id)
         {
@@ -149,7 +149,8 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        // POST /values
+        //this function adds a single Products to the database
+        //it takes a single parameter of type Priducts to be parsed for input
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Product product)
         {
@@ -178,7 +179,9 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        // PUT /values/5
+        //this function updates a single Product in the database
+        //the id parameter indicates which database record should be updated
+        //the Product type parameter contains the data to be updated into the indicated database record
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, [FromBody] Product product)
         {
@@ -235,7 +238,9 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        //DELETE api/values/5
+        //this function deletes a single Product in the database
+        //the id parameter indicates which database record should be deleted
+       
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -265,6 +270,8 @@ namespace BangazonAPI.Controllers
             }
         }
 
+        //this function checks the database for the existence of a record matching the id parameter, and returns true or false
+        //the id parameter indicates which database record should be pulled
         private bool ProductExists(int id)
         {
             using (SqlConnection conn = Connection)

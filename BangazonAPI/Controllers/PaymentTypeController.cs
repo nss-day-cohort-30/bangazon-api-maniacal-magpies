@@ -84,6 +84,7 @@ namespace BangazonAPI.Controllers
         }
 
         //this method allows for selection of a single payment type based off of the inputted ID
+
         [HttpGet("{id}", Name = "GetPaymentType")]
         public async Task<IActionResult> Get([FromRoute] int id)
         {
@@ -131,6 +132,7 @@ namespace BangazonAPI.Controllers
         }
 
         //this method adds a new payment type
+        //it takes a single parameter of type PaymentType to be parsed for input
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] PaymentType paymentType)
         {
@@ -154,6 +156,8 @@ namespace BangazonAPI.Controllers
         }
 
         //this method allows for update of a single payment type based off of the inputted ID
+        //the id parameter indicates which database record should be updated
+        //the PaymentType parameter contains the data to be updated into the indicated database record
         [HttpPut("{id}")]
         public async Task<IActionResult> Put([FromRoute] int id, [FromBody] PaymentType paymentType)
         {
@@ -197,7 +201,7 @@ namespace BangazonAPI.Controllers
         }
 
 
-        //this method delets a single payment type based off of the inputted ID
+        //this method delets a single payment type based off of the inputted id parameter
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
@@ -235,6 +239,8 @@ namespace BangazonAPI.Controllers
         }
 
         //if it is in the database perform this action
+        //this function checks the database for the existence of a record matching the id parameter, and returns true or false
+        //the id parameter indicates which database record should be pulled
         private bool PaymentTypeExists(int id)
         {
             using (SqlConnection conn = Connection)

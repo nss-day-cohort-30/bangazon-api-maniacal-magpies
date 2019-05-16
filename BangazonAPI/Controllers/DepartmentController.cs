@@ -255,6 +255,7 @@ namespace BangazonAPI.Controllers
         }
         [HttpPost]
         //this function adds a single Department to the database
+        //it takes a single parameter of type Department to be parsed for input
         public async Task<IActionResult> Post([FromBody] Department department)
         {
             using (SqlConnection conn = Connection)
@@ -275,7 +276,9 @@ namespace BangazonAPI.Controllers
             }
         }
         [HttpPut("{id}")]
-        //this function updates a Department in the database based 
+        //this function updates a single Department in the database
+        //the id parameter indicates which database record should be updated
+        //the Department type parameter contains the data to be updated into the indicated database record
         public async Task<IActionResult> Put([FromRoute] int id, [FromBody] Department department)
         {
             try
@@ -315,6 +318,8 @@ namespace BangazonAPI.Controllers
         }
 
         //Department does NOT have a Delete function
+        //this function checks the database for the existence of a record matching the id parameter, and returns true or false
+        //the id parameter indicates which database record should be pulled
 
         private bool DepartmentExists(int id)
         {
