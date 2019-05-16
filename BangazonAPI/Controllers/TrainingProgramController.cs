@@ -30,20 +30,25 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        // Gets all Training Programs in the database and see Employees who are attending
+        // Gets all Training Programs in the database and view Employees who are attending
         [HttpGet]
-        public async Task<IActionResult> Get(string completed)
+        public async Task<IActionResult> Get(bool? completed)
         {
             // SQL string for Training Program query
-            string sql_head = "SELECT tp.Id, tp.[Name], tp.StartDate, tp.EndDate, tp.MaxAttendees, e.FirstName, e.LastName";
+            string sql_head = "SELECT tp.Id, tp.[Name], tp.StartDate, tp.EndDate, tp.MaxAttendees, e.FirstName, e.LastName, e.DepartmentId, e.IsSuperVisor";
             string sql_end = @"FROM TrainingProgram tp
-                               JOIN EmployeeTraining et ON et.TrainingProgramId = tp.Id
-                               JOIN Employee e ON et.EmployeeId = e.Id";
+                               LEFT JOIN EmployeeTraining et ON et.TrainingProgramId = tp.Id
+                               LEFT JOIN Employee e ON et.EmployeeId = e.Id";
             string sql = $"{sql_head} {sql_end}";
 
-            if (completed == "false?") //?completed=false?
+            if (completed == false) //?completed=false?
             {
                 string sql_where = "WHERE StartDate > CONVERT(date, getdate())";
+                sql = $"{sql_head} {sql_end} {sql_where}";
+            }
+            else if (completed == true) //?completed=false?
+            {
+                string sql_where = "WHERE StartDate <= CONVERT(date, getdate())";
                 sql = $"{sql_head} {sql_end} {sql_where}";
             }
 
@@ -57,27 +62,37 @@ namespace BangazonAPI.Controllers
 
                     SqlDataReader reader = await cmd.ExecuteReaderAsync();
 
-                    List<TrainingProgram> trainingPrograms = new List<TrainingProgram>();
-
                     Dictionary<int, TrainingProgram> trainingProgramHash = new Dictionary<int, TrainingProgram>();
 
                     while (reader.Read())
                     {
                         int trainingProgramId = reader.GetInt32(reader.GetOrdinal("Id"));
-
-                        // this isn't right
-                        if (!trainingProgramHash.ContainsKey(trainingProgramId));
-                        TrainingProgram trainingProgram = new TrainingProgram
+                        if (!trainingProgramHash.ContainsKey(trainingProgramId))
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            Name = reader.GetString(reader.GetOrdinal("Name")),
-                            StartDate = reader.GetDateTime(reader.GetOrdinal("startDate")),
-                            EndDate = reader.GetDateTime(reader.GetOrdinal("endDate")),
-                            MaxAttendees = reader.GetInt32(reader.GetOrdinal("maxAttendees"))
-                        };
+                            trainingProgramHash[trainingProgramId] = new TrainingProgram
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("id")),
+                                Name = reader.GetString(reader.GetOrdinal("name")),
+                                StartDate = reader.GetDateTime(reader.GetOrdinal("startDate")),
+                                EndDate = reader.GetDateTime(reader.GetOrdinal("endDate")),
+                                MaxAttendees = reader.GetInt32(reader.GetOrdinal("maxAttendees")),
+                                Attendees = new List<Employee>()
+                            };
+                        }
 
-                        trainingPrograms.Add(trainingProgram);
+                        if (!reader.IsDBNull(reader.GetOrdinal("FirstName")))
+                        {
+                            trainingProgramHash[trainingProgramId].Attendees.Add(new Employee
+                            {
+                                FirstName = reader.GetString(reader.GetOrdinal("firstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("lastName")),
+                                DepartmentId = reader.GetInt32(reader.GetOrdinal("departmentId")),
+                                IsSuperVisor = reader.GetBoolean(reader.GetOrdinal("isSuperVisor"))
+                            });
+                        }
                     }
+
+                    List<TrainingProgram> trainingPrograms = trainingProgramHash.Values.ToList();
 
                     reader.Close();
 
@@ -86,44 +101,77 @@ namespace BangazonAPI.Controllers
             }
         }
 
+
+
         // GET api/values/5
         [HttpGet("{id}", Name = "GetTrainingProgram")]
         public async Task<IActionResult> Get([FromRoute]int id)
         {
-            if (!TrainingProgramExists(id))
+            try
             {
-                return new StatusCodeResult(StatusCodes.Status404NotFound);
-            }
-            using (SqlConnection conn = Connection)
-            {
-                conn.Open();
-                using (SqlCommand cmd = conn.CreateCommand())
+                // SQL string for single Training Program query
+                string sql_head = "SELECT tp.Id, tp.[Name], tp.StartDate, tp.EndDate, tp.MaxAttendees, e.FirstName, e.LastName, e.DepartmentId, e.IsSuperVisor";
+                string sql_end = @"FROM TrainingProgram tp
+                               LEFT JOIN EmployeeTraining et ON et.TrainingProgramId = tp.Id
+                               LEFT JOIN Employee e ON et.EmployeeId = e.Id";
+                string sql_where = "WHERE tp.Id = @id";
+                string sql = $"{sql_head} {sql_end} {sql_where}";
+
+                using (SqlConnection conn = Connection)
                 {
-                    cmd.CommandText = @"
-                        SELECT
-                            Id, Name
-                        FROM TrainingProgram
-                        WHERE Id =@id";
-                    cmd.Parameters.Add(new SqlParameter("@id", id));
-                    SqlDataReader reader = await cmd.ExecuteReaderAsync();
-
-                    TrainingProgram trainingProgram = null;
-
-                    if (reader.Read())
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
                     {
-                        trainingProgram = new TrainingProgram
+                        cmd.CommandText = sql;
+                        cmd.Parameters.Add(new SqlParameter("@id", id));
+                        SqlDataReader reader = await cmd.ExecuteReaderAsync();
+
+                        TrainingProgram trainingProgram = null;
+
+                        while (reader.Read())
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            Name = reader.GetString(reader.GetOrdinal("Name"))
-                        };
+                            trainingProgram = new TrainingProgram
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("id")),
+                                Name = reader.GetString(reader.GetOrdinal("name")),
+                                StartDate = reader.GetDateTime(reader.GetOrdinal("startDate")),
+                                EndDate = reader.GetDateTime(reader.GetOrdinal("endDate")),
+                                MaxAttendees = reader.GetInt32(reader.GetOrdinal("maxAttendees")),
+                                Attendees = new List<Employee>()
+                            };
+                            if (!reader.IsDBNull(reader.GetOrdinal("firstName")))
+                                {
+                                trainingProgram.Attendees.Add(new Employee
+                                {
+                                    FirstName = reader.GetString(reader.GetOrdinal("firstName")),
+                                    LastName = reader.GetString(reader.GetOrdinal("lastName")),
+                                    DepartmentId = reader.GetInt32(reader.GetOrdinal("departmentId")),
+                                    IsSuperVisor = reader.GetBoolean(reader.GetOrdinal("isSuperVisor"))
+                                });
+                            }
+                        }
+
+                        reader.Close();
+
+                        return Ok(trainingProgram);
                     }
+                }
+            }
 
-                    reader.Close();
-
-                    return Ok(trainingProgram);
+            catch (Exception)
+            {
+                if (!TrainingProgramExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
                 }
             }
         }
+
+
 
         // POST api/values
         [HttpPost]
@@ -136,11 +184,14 @@ namespace BangazonAPI.Controllers
                 {
                     // More string interpolation
                     cmd.CommandText = @"
-                        INSERT INTO TrainingProgram (Name)
+                        INSERT INTO TrainingProgram (Name, StartDate, EndDate, MaxAttendees)
                         OUTPUT INSERTED.Id
-                        VALUES (@name);
+                        VALUES (@name, @startDate, @endDate, @maxAttendees);
                     ";
                     cmd.Parameters.Add(new SqlParameter("@name", trainingProgram.Name));
+                    cmd.Parameters.Add(new SqlParameter("@startDate", trainingProgram.StartDate));
+                    cmd.Parameters.Add(new SqlParameter("@endDate", trainingProgram.EndDate));
+                    cmd.Parameters.Add(new SqlParameter("@maxAttendees", trainingProgram.MaxAttendees));
 
                     trainingProgram.Id = (int)await cmd.ExecuteScalarAsync();
 
@@ -162,12 +213,17 @@ namespace BangazonAPI.Controllers
                     {
                         cmd.CommandText = @"
                             UPDATE TrainingProgram
-                            SET Name = @Name
-                            -- Set the remaining columns here
+                            SET Name = @name,
+                            StartDate = @startDate,
+                            EndDate = @endDate,
+                            MaxAttendees = @maxAttendees
                             WHERE Id = @id
                         ";
                         cmd.Parameters.Add(new SqlParameter("@id", trainingProgram.Id));
-                        cmd.Parameters.Add(new SqlParameter("@Name", trainingProgram.Name));
+                        cmd.Parameters.Add(new SqlParameter("@name", trainingProgram.Name));
+                        cmd.Parameters.Add(new SqlParameter("@startDate", trainingProgram.StartDate));
+                        cmd.Parameters.Add(new SqlParameter("@endDate", trainingProgram.EndDate));
+                        cmd.Parameters.Add(new SqlParameter("@maxAttendees", trainingProgram.MaxAttendees));
 
                         int rowsAffected = await cmd.ExecuteNonQueryAsync();
 
