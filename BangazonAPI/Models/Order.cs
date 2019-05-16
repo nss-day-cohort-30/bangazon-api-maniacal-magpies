@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 namespace BangazonAPI.Models
 {
+    //Model to represent a single Order
     public class Order
     {
         public int Id { get; set; }

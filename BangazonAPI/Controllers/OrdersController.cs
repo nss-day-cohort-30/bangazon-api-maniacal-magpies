@@ -10,7 +10,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace BangazonAPI.Controllers
 {
-    [Route("[controller]")]
+    [Route("[controller]")]  //  /orders
     [ApiController]
     public class OrdersController : ControllerBase
     {
@@ -364,7 +364,7 @@ namespace BangazonAPI.Controllers
                         VALUES (@CustomerId, @PaymentTypeId)
                     ";
                     cmd.Parameters.Add(new SqlParameter("@CustomerId", order.CustomerId));
-                    cmd.Parameters.Add(new SqlParameter("@PaymentTypeId", order.PaymentTypeId));
+                    cmd.Parameters.Add(new SqlParameter("@PaymentTypeId", order.PaymentTypeId != null ? (object)order.PaymentTypeId : DBNull.Value));
 
                     order.Id = (int)await cmd.ExecuteScalarAsync();
 

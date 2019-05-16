@@ -150,6 +150,27 @@ namespace TestBangazonAPI
 
                 Assert.Equal(HttpStatusCode.OK, getNewProduct.StatusCode);
                 Assert.Equal(newTitle, newTitleProductCard.Title);
+
+
+                /*
+                    reset data
+                 */
+                Product resetTestProduct = new Product
+                {
+                    Id = 1,
+                    ProductTypeId = 1,
+                    CustomerId = 1,
+                    Price = 11.50M,
+                    Title = "Electronic Thingy",
+                    Description = "It's a thing and it's electronic",
+                    Quantity = 5
+                };
+                var resetTestProductAsJSON = JsonConvert.SerializeObject(resetTestProduct);
+
+                var resetResponse = await client.PutAsync(
+                    "/products/1",
+                    new StringContent(resetTestProductAsJSON, Encoding.UTF8, "application/json")
+                );
             }
         }
 

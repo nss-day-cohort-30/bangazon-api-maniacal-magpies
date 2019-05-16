@@ -55,8 +55,8 @@ namespace TestBangazonAPI
                 var departments = JsonConvert.DeserializeObject<Department>(responseBody);
 
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                Assert.Equal("Engineering", departments.Name);
-                Assert.Equal(400000, departments.Budget);               
+                Assert.Equal("IT", departments.Name);
+                Assert.Equal(300000, departments.Budget);               
                 Assert.NotNull(departments);
             }
         }
@@ -113,7 +113,7 @@ namespace TestBangazonAPI
                 var newNameAsJSON = JsonConvert.SerializeObject(changeCustodial);
 
                 var response = await client.PutAsync(
-                    "/Department/9",
+                    "/Department/2",
                     new StringContent(newNameAsJSON, Encoding.UTF8, "application/json")
                 );
                 response.EnsureSuccessStatusCode();
@@ -124,7 +124,7 @@ namespace TestBangazonAPI
                 /*
                     GET section
                  */
-                var getNewName = await client.GetAsync("/Department/9");
+                var getNewName = await client.GetAsync("/Department/2");
                 getNewName.EnsureSuccessStatusCode();
 
                 string getNewNameBody = await getNewName.Content.ReadAsStringAsync();
