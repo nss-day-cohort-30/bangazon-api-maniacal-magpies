@@ -105,4 +105,8 @@ VALUES (2, 2);
 INSERT INTO EmployeeTraining (EmployeeId, TrainingProgramId)
 VALUES (3, 1);
 INSERT INTO EmployeeTraining (EmployeeId, TrainingProgramId)
+<<<<<<< HEAD
 VALUES (3, 1);
+=======
+VALUES (3, 1); 
+>>>>>>> master

@@ -1,3 +1,12 @@
+<<<<<<< HEAD
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.352
+MinimumVisualStudioVersion = 15.0.26124.0
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BangazonAPI", "BangazonAPI\BangazonAPI.csproj", "{EB7B7CFE-80A4-48EF-ACB6-AA58EC3933B0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestBangazonAPI", "TestBangazonAPI\TestBangazonAPI.csproj", "{CDACDB8D-0E66-402F-AEC4-8D8F85DAC384}"
+=======
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
@@ -6,6 +15,7 @@ MinimumVisualStudioVersion = 15.0.26124.0
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestBangazonAPI", "TestBangazonAPI\TestBangazonAPI.csproj", "{7F630C44-5543-4D93-A62B-DCB502C75F42}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BangazonAPI", "BangazonAPI\BangazonAPI.csproj", "{3C7E2B09-6DC5-4F27-B820-8F781A496473}"
+>>>>>>> master
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -16,6 +26,39 @@ Global
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
 	EndGlobalSection
+<<<<<<< HEAD
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EB7B7CFE-80A4-48EF-ACB6-AA58EC3933B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB7B7CFE-80A4-48EF-ACB6-AA58EC3933B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB7B7CFE-80A4-48EF-ACB6-AA58EC3933B0}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{EB7B7CFE-80A4-48EF-ACB6-AA58EC3933B0}.Debug|x64.Build.0 = Debug|Any CPU
+		{EB7B7CFE-80A4-48EF-ACB6-AA58EC3933B0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{EB7B7CFE-80A4-48EF-ACB6-AA58EC3933B0}.Debug|x86.Build.0 = Debug|Any CPU
+		{EB7B7CFE-80A4-48EF-ACB6-AA58EC3933B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB7B7CFE-80A4-48EF-ACB6-AA58EC3933B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB7B7CFE-80A4-48EF-ACB6-AA58EC3933B0}.Release|x64.ActiveCfg = Release|Any CPU
+		{EB7B7CFE-80A4-48EF-ACB6-AA58EC3933B0}.Release|x64.Build.0 = Release|Any CPU
+		{EB7B7CFE-80A4-48EF-ACB6-AA58EC3933B0}.Release|x86.ActiveCfg = Release|Any CPU
+		{EB7B7CFE-80A4-48EF-ACB6-AA58EC3933B0}.Release|x86.Build.0 = Release|Any CPU
+		{CDACDB8D-0E66-402F-AEC4-8D8F85DAC384}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CDACDB8D-0E66-402F-AEC4-8D8F85DAC384}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CDACDB8D-0E66-402F-AEC4-8D8F85DAC384}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CDACDB8D-0E66-402F-AEC4-8D8F85DAC384}.Debug|x64.Build.0 = Debug|Any CPU
+		{CDACDB8D-0E66-402F-AEC4-8D8F85DAC384}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CDACDB8D-0E66-402F-AEC4-8D8F85DAC384}.Debug|x86.Build.0 = Debug|Any CPU
+		{CDACDB8D-0E66-402F-AEC4-8D8F85DAC384}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CDACDB8D-0E66-402F-AEC4-8D8F85DAC384}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CDACDB8D-0E66-402F-AEC4-8D8F85DAC384}.Release|x64.ActiveCfg = Release|Any CPU
+		{CDACDB8D-0E66-402F-AEC4-8D8F85DAC384}.Release|x64.Build.0 = Release|Any CPU
+		{CDACDB8D-0E66-402F-AEC4-8D8F85DAC384}.Release|x86.ActiveCfg = Release|Any CPU
+		{CDACDB8D-0E66-402F-AEC4-8D8F85DAC384}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {618F53D8-39E3-4162-BEA8-9C63F44EB4C7}
+=======
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
@@ -44,5 +87,6 @@ Global
 		{3C7E2B09-6DC5-4F27-B820-8F781A496473}.Release|x64.Build.0 = Release|Any CPU
 		{3C7E2B09-6DC5-4F27-B820-8F781A496473}.Release|x86.ActiveCfg = Release|Any CPU
 		{3C7E2B09-6DC5-4F27-B820-8F781A496473}.Release|x86.Build.0 = Release|Any CPU
+>>>>>>> master
 	EndGlobalSection
 EndGlobal

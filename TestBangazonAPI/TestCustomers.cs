@@ -206,37 +206,6 @@ namespace TestBangazonAPI
         }
 
         [Fact]
-        public async Task Test_Include_Products()
-        {
-            using (var client = new APIClientProvider().Client)
-            {
-                /*
-                    ARRANGE
-                */
-
-                //no arrange for gets
-
-                /*
-                    ACT
-                */
-                var response = await client.GetAsync("/customer/1?_include=products");
-
-                response.EnsureSuccessStatusCode();
-
-                string responseBody = await response.Content.ReadAsStringAsync();
-                var customer = JsonConvert.DeserializeObject<Customer>(responseBody);
-
-                /*
-                    ASSERT
-                */
-                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                Assert.Equal("Summer", customer.FirstName);
-                Assert.Equal("Electronic Thingy", customer.ProductsSelling[0].Title);
-                Assert.NotNull(customer);
-            }
-        }
-
-        [Fact]
         public async Task Test_Active_False()
         {
             using (var client = new APIClientProvider().Client)
