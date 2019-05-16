@@ -51,23 +51,4 @@ Ensure your database is properly created using the [Official Bangazon SQL](./cre
 
 In order to enable built-in integrated tests, please use the following SQL code: [Official Bangazon Testing Data](./fill-bangazon-tables.sql) in Azure Data Studio.
 
-For **Department** testing, use the official Bangazon SQL, then run
-``INSERT INTO Department ([Name], Budget) VALUES ('Engineering', 400000);
-INSERT INTO Department ([Name], Budget) VALUES ('Accounting', 250000);
-INSERT INTO Department ([Name], Budget) VALUES ('I.T.', 450000);
-INSERT INTO Department ([Name], Budget) VALUES ('Human Resources', 175500);
-INSERT INTO Department ([Name], Budget) VALUES ('Custodial', 15000);
-INSERT INTO Department ([Name], Budget) VALUES ('Custodial', 15000);
-INSERT INTO Department ([Name], Budget) VALUES ('Custodial', 15000);
-INSERT INTO Department ([Name], Budget) VALUES ('Custodial', 15000);
-INSERT INTO Department ([Name], Budget) VALUES ('Custodial', 15000);
-INSERT INTO Department ([Name], Budget) VALUES ('Custodial', 15000);
-
-INSERT INTO Employee (FirstName, LastName, DepartmentId, IsSuperVisor) VALUES
-('Bange', 'Tend', 2, 'True');
-INSERT INTO Employee (FirstName, LastName, DepartmentId, IsSuperVisor) VALUES
-('Tony', 'Bob', 2, 'True');
-INSERT INTO Employee (FirstName, LastName, DepartmentId, IsSuperVisor) VALUES
-('Bob', 'Davies', 1, 'False');``
-
 If any tests fail, re-run CREATE, then FILL, then run that test by itself. If it fails again, please report the results as a bug.
