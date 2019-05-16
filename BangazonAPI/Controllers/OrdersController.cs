@@ -29,7 +29,15 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        // GET /values
+        /* 
+            Method to get all orders, with products embedded.
+            query parameters:
+                ?_include=customers will return buyer information on the order
+                ?completed=true will return completed orders
+                ?completed=false will return open orders
+        */
+
+        //GET /values
         [HttpGet]
         public async Task<IActionResult> Get(bool? completed, string _include)
         {
@@ -38,16 +46,23 @@ namespace BangazonAPI.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    //===========================
-                    //|      GET QUERIES        |
-                    //===========================
+                    //=================================
+                    //| GET QUERIES AND SQL STATEMENT |
+                    //=================================
 
                     //default SQL statement
-                    string sql_select = @"SELECT o.Id, o.CustomerId, o.PaymentTypeId,
-                                        pt.AcctNumber PaymentAccount, pt.Name PaymentName
+                    string sql_select = @"SELECT o.Id, o.CustomerId BuyerId, o.PaymentTypeId,
+                                        pt.AcctNumber PaymentAccount, pt.Name PaymentName,
+                                        p.Id ProductId, p.Price, p.Title ProductTitle, p.Description ProductDescription, p.Quantity ProductQuantity, p.CustomerId SellerId,
+                                        prodtype.Id ProductTypeId, prodtype.Name ProductTypeName,
+                                        seller.FirstName SellerFirstName, seller.LastName SellerLastName
                                         ";
 
-                    string sql_join = @" FROM [Order] o LEFT JOIN PaymentType pt ON pt.Id = o.PaymentTypeId";
+                    string sql_join = @" FROM [Order] o LEFT JOIN PaymentType pt ON pt.Id = o.PaymentTypeId
+                                         JOIN OrderProduct op ON op.OrderId = o.Id
+                                         JOIN Product p ON op.ProductId = p.Id
+                                         JOIN ProductType prodtype ON p.ProductTypeId = prodtype.Id
+                                         JOIN Customer seller ON seller.Id = p.CustomerId";
                     string sql_end = @" WHERE 1=1";
 
                     //'completed' query will include completed(true) or non-completed(false) orders
@@ -63,53 +78,34 @@ namespace BangazonAPI.Controllers
                         }
                     }
 
-                    //'_include' query can equal 'products' and/or 'customers' to return relevant information with the order
-
+                    //'_include' query can equal 'customers' to return relevant information with the order
                     bool includeCustomers = false;
-                    bool includeProducts = false;
 
-                    if (_include != null)
+                    if (_include != null && _include == "customers") // ?_include=customers
                     {
-                        if (_include == "customers")  // ?_include=customers
-                        {
-                            includeCustomers = true;
-                            sql_select += ", c.FirstName, c.LastName";
-                            sql_join += " JOIN Customer c ON c.Id = o.CustomerId";
-                        }
-                        else if (_include == "products")  // ?_include=products
-                        {
-                            includeProducts = true;
-                            sql_select += @", c.FirstName, c.LastName,
-                                          p.Id ProductId, p.Price, p.Title ProductTitle, p.Description ProductDescription, p.Quantity ProductQuantity, p.CustomerId SellerId,
-                                          prodtype.Id ProductTypeId, prodtype.Name ProductTypeName";
-                            sql_join += @" JOIN Customer c ON c.Id = o.CustomerId
-                                          JOIN OrderProduct op ON op.OrderId = o.Id
-                                          JOIN Product p ON op.ProductId = p.Id
-                                          JOIN ProductType prodtype ON p.ProductTypeId = prodtype.Id";
-                        }
-                        //TODO: if an invalid query is used with 'include' throw an error?
-
+                        includeCustomers = true;
+                        sql_select += ", c.FirstName BuyerFirstName, c.LastName BuyerLastName";
+                        sql_join += " JOIN Customer c ON c.Id = o.CustomerId";
                     }
+                    //TODO: if an invalid query is used with 'include' throw an error?
 
                     //construct the final SQL statement based on queries used
                     string sql = sql_select + sql_join + sql_end;
 
                     cmd.CommandText = sql;
-
                     SqlDataReader reader = await cmd.ExecuteReaderAsync();
 
                     Dictionary<int, Order> ordersHash = new Dictionary<int, Order>();
 
+                    //iterate through all rows of data, adding each order to the dictionary once and each individual product to the relevant order
                     while (reader.Read())
                     {
-                        //id of current order for hash usage
                         int orderId = reader.GetInt32(reader.GetOrdinal("Id"));
 
                         //set initial values to null, to be changed based on queries used
                         int? paymentTypeId = null;
                         PaymentType payment = null;
                         Customer customer = null;
-                        List<Product> products = null;
 
                         //check for non-null payment type, and initialize PaymentType
                         if (!reader.IsDBNull(reader.GetOrdinal("PaymentTypeId")))
@@ -120,7 +116,7 @@ namespace BangazonAPI.Controllers
                                 Id = (int)paymentTypeId,
                                 AcctNumber = reader.GetInt32(reader.GetOrdinal("PaymentAccount")),
                                 Name = reader.GetString(reader.GetOrdinal("PaymentName")),
-                                CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
+                                CustomerId = reader.GetInt32(reader.GetOrdinal("BuyerId")),
                                 Customer = null
                             };
                         }
@@ -130,17 +126,12 @@ namespace BangazonAPI.Controllers
                         {
                             customer = new Customer
                             {
-                                Id = reader.GetInt32(reader.GetOrdinal("CustomerId")),
-                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
-                                LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                Id = reader.GetInt32(reader.GetOrdinal("BuyerId")),
+                                FirstName = reader.GetString(reader.GetOrdinal("BuyerFirstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("BuyerLastName")),
                                 ProductsSelling = null,
                                 PaymentTypesUsed = null
                             };
-                        }
-
-                        if (includeProducts)
-                        {
-                            products = new List<Product>();
                         }
 
                         //initialize the new Order in the hash OR add new product to order already in the hash
@@ -149,30 +140,34 @@ namespace BangazonAPI.Controllers
                             ordersHash[orderId] = new Order
                             {
                                 Id = orderId,
-                                CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
+                                CustomerId = reader.GetInt32(reader.GetOrdinal("BuyerId")),
                                 Customer = customer,
                                 PaymentTypeId = paymentTypeId,
                                 Payment = payment,
-                                Products = products
+                                Products = new List<Product>()
                             };
                         }
 
-                        //check if products should be included, and use hash table to populate List
-                        if (includeProducts)
+                        //instantiate and add product to order
+                        ordersHash[orderId].Products.Add(new Product
                         {
-                            ordersHash[orderId].Products.Add(new Product
+                            Id = reader.GetInt32(reader.GetOrdinal("ProductId")),
+                            ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
+                            ProductType = reader.GetString(reader.GetOrdinal("ProductTypeName")),
+                            CustomerId = reader.GetInt32(reader.GetOrdinal("SellerId")),
+                            Customer = new Customer
                             {
-                                Id = reader.GetInt32(reader.GetOrdinal("ProductId")),
-                                ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
-                                ProductType = reader.GetString(reader.GetOrdinal("ProductTypeName")),
-                                CustomerId = reader.GetInt32(reader.GetOrdinal("SellerId")),
-                                Customer = null,
-                                Price = reader.GetDecimal(reader.GetOrdinal("Price")),
-                                Title = reader.GetString(reader.GetOrdinal("ProductTitle")),
-                                Description = reader.GetString(reader.GetOrdinal("ProductDescription")),
-                                Quantity = reader.GetInt32(reader.GetOrdinal("ProductQuantity")),
-                            });
-                        }
+                                Id = reader.GetInt32(reader.GetOrdinal("SellerId")),
+                                FirstName = reader.GetString(reader.GetOrdinal("SellerFirstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("SellerLastName")),
+                                ProductsSelling = null,
+                                PaymentTypesUsed = null
+                            },
+                            Price = reader.GetDecimal(reader.GetOrdinal("Price")),
+                            Title = reader.GetString(reader.GetOrdinal("ProductTitle")),
+                            Description = reader.GetString(reader.GetOrdinal("ProductDescription")),
+                            Quantity = reader.GetInt32(reader.GetOrdinal("ProductQuantity")),
+                        });
 
                     }
 
@@ -185,9 +180,15 @@ namespace BangazonAPI.Controllers
             }
         }
 
+        /* 
+            Method to get a single order, with products embedded.
+            query parameters:
+                ?_include=customers will return buyer information on the order
+        */
+
         // GET /values/5
         [HttpGet("{id}", Name = "GetOrder")]
-        public async Task<IActionResult> Get(int id)
+        public async Task<IActionResult> Get(int id, string _include)
         {
             if (!OrderExists(id))
             {
@@ -199,13 +200,41 @@ namespace BangazonAPI.Controllers
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
 
-                    //===========================
-                    //|    GET QUERIES          |
-                    //===========================
-                    //construct the SQL statement based on queries used
-                    string sql_head = @"SELECT o.Id, o.CustomerId, o.PaymentTypeId FROM [Order] o";
+                    //=================================
+                    //| GET QUERIES AND SQL STATEMENT |
+                    //=================================
+
+                    //default SQL statement
+                    string sql_select = @"SELECT o.Id, o.CustomerId BuyerId, o.PaymentTypeId,
+                                        pt.AcctNumber PaymentAccount, pt.Name PaymentName,
+                                        p.Id ProductId, p.Price, p.Title ProductTitle, p.Description ProductDescription, p.Quantity ProductQuantity, p.CustomerId SellerId,
+                                        prodtype.Id ProductTypeId, prodtype.Name ProductTypeName,
+                                        seller.FirstName SellerFirstName, seller.LastName SellerLastName
+                                        ";
+
+                    string sql_join = @" FROM [Order] o LEFT JOIN PaymentType pt ON pt.Id = o.PaymentTypeId
+                                         JOIN OrderProduct op ON op.OrderId = o.Id
+                                         JOIN Product p ON op.ProductId = p.Id
+                                         JOIN ProductType prodtype ON p.ProductTypeId = prodtype.Id
+                                         JOIN Customer seller ON seller.Id = p.CustomerId";
                     string sql_end = @" WHERE o.Id = @id";
-                    string sql = sql_head + sql_end;
+
+                    //'_include' query can equal 'customers' to return relevant information with the order
+                    bool includeCustomers = false;
+
+                    if (_include != null && _include == "customers") // ?_include=customers
+                    {
+                        includeCustomers = true;
+                        sql_select += ", c.FirstName BuyerFirstName, c.LastName BuyerLastName";
+                        sql_join += " JOIN Customer c ON c.Id = o.CustomerId";
+                    }
+
+                    /*
+                        TODO: if an invalid query is used with 'include' throw an error?
+                    */
+
+                    //construct the final SQL statement based on queries used
+                    string sql = sql_select + sql_join + sql_end;
 
                     cmd.CommandText = sql;
                     cmd.Parameters.Add(new SqlParameter("@id", id));
@@ -213,30 +242,82 @@ namespace BangazonAPI.Controllers
                     SqlDataReader reader = await cmd.ExecuteReaderAsync();
 
                     Order order = null;
+                    Dictionary<int, Order> orderHash = new Dictionary<int, Order>();
 
-                    if (reader.Read())
+
+                    while (reader.Read())
                     {
 
-                        // set initial values to null, to be changed based on queries used
+                        int orderId = reader.GetInt32(reader.GetOrdinal("Id"));
+
+                        //set initial values to null, to be changed based on queries used
                         int? paymentTypeId = null;
                         PaymentType payment = null;
                         Customer customer = null;
-                        List<Product> products = null;
 
+                        //check for non-null payment type, and initialize PaymentType
                         if (!reader.IsDBNull(reader.GetOrdinal("PaymentTypeId")))
                         {
                             paymentTypeId = reader.GetInt32(reader.GetOrdinal("PaymentTypeId"));
+                            payment = new PaymentType
+                            {
+                                Id = (int)paymentTypeId,
+                                AcctNumber = reader.GetInt32(reader.GetOrdinal("PaymentAccount")),
+                                Name = reader.GetString(reader.GetOrdinal("PaymentName")),
+                                CustomerId = reader.GetInt32(reader.GetOrdinal("BuyerId")),
+                                Customer = null
+                            };
                         }
 
-                        order = new Order
+                        //check if customers should be included, and initialize
+                        if (includeCustomers)
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
-                            Customer = customer,
-                            PaymentTypeId = paymentTypeId,
-                            Payment = payment,
-                            Products = products
-                        };
+                            customer = new Customer
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("BuyerId")),
+                                FirstName = reader.GetString(reader.GetOrdinal("BuyerFirstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("BuyerLastName")),
+                                ProductsSelling = null,
+                                PaymentTypesUsed = null
+                            };
+                        }
+
+                        //initialize the new Order in the hash OR add new product to order already in the hash
+                        if (!orderHash.ContainsKey(orderId))
+                        {
+                            orderHash[orderId] = new Order
+                            {
+                                Id = orderId,
+                                CustomerId = reader.GetInt32(reader.GetOrdinal("BuyerId")),
+                                Customer = customer,
+                                PaymentTypeId = paymentTypeId,
+                                Payment = payment,
+                                Products = new List<Product>()
+                            };
+                        }
+
+                        //instantiate and add product to order
+                        orderHash[orderId].Products.Add(new Product
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("ProductId")),
+                            ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
+                            ProductType = reader.GetString(reader.GetOrdinal("ProductTypeName")),
+                            CustomerId = reader.GetInt32(reader.GetOrdinal("SellerId")),
+                            Customer = new Customer
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("SellerId")),
+                                FirstName = reader.GetString(reader.GetOrdinal("SellerFirstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("SellerLastName")),
+                                ProductsSelling = null,
+                                PaymentTypesUsed = null
+                            },
+                            Price = reader.GetDecimal(reader.GetOrdinal("Price")),
+                            Title = reader.GetString(reader.GetOrdinal("ProductTitle")),
+                            Description = reader.GetString(reader.GetOrdinal("ProductDescription")),
+                            Quantity = reader.GetInt32(reader.GetOrdinal("ProductQuantity")),
+                        });
+
+                        order = orderHash[orderId];
                     }
 
                     reader.Close();
@@ -246,34 +327,34 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        //// POST /values
-        //[HttpPost]
-        //public async Task<IActionResult> Post([FromBody] Product product)
-        //{
-        //    using (SqlConnection conn = Connection)
-        //    {
-        //        conn.Open();
-        //        using (SqlCommand cmd = conn.CreateCommand())
-        //        {
-        //            // More string interpolation
-        //            cmd.CommandText = @"
-        //                INSERT INTO Product (ProductTypeId, CustomerId, Price, Title, Description, Quantity)
-        //                OUTPUT INSERTED.Id
-        //                VALUES (@ProductTypeId, @CustomerId, @Price, @Title, @Description, @Quantity)
-        //            ";
-        //            cmd.Parameters.Add(new SqlParameter("@ProductTypeId", product.ProductTypeId));
-        //            cmd.Parameters.Add(new SqlParameter("@CustomerId", product.CustomerId));
-        //            cmd.Parameters.Add(new SqlParameter("@Price", product.Price));
-        //            cmd.Parameters.Add(new SqlParameter("@Title", product.Title));
-        //            cmd.Parameters.Add(new SqlParameter("@Description", product.Description));
-        //            cmd.Parameters.Add(new SqlParameter("@Quantity", product.Quantity));
+        // POST /values
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody] Product product)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    // More string interpolation
+                    cmd.CommandText = @"
+                        INSERT INTO Product (ProductTypeId, CustomerId, Price, Title, Description, Quantity)
+                        OUTPUT INSERTED.Id
+                        VALUES (@ProductTypeId, @CustomerId, @Price, @Title, @Description, @Quantity)
+                    ";
+                    cmd.Parameters.Add(new SqlParameter("@ProductTypeId", product.ProductTypeId));
+                    cmd.Parameters.Add(new SqlParameter("@CustomerId", product.CustomerId));
+                    cmd.Parameters.Add(new SqlParameter("@Price", product.Price));
+                    cmd.Parameters.Add(new SqlParameter("@Title", product.Title));
+                    cmd.Parameters.Add(new SqlParameter("@Description", product.Description));
+                    cmd.Parameters.Add(new SqlParameter("@Quantity", product.Quantity));
 
-        //            product.Id = (int)await cmd.ExecuteScalarAsync();
+                    product.Id = (int)await cmd.ExecuteScalarAsync();
 
-        //            return CreatedAtRoute("GetProduct", new { id = product.Id }, product);
-        //        }
-        //    }
-        //}
+                    return CreatedAtRoute("GetProduct", new { id = product.Id }, product);
+                }
+            }
+        }
 
         //// PUT /values/5
         //[HttpPut("{id}")]
